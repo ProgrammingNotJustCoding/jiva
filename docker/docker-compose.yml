@@ -1,0 +1,11 @@
+name: jiva
+
+include:
+  - ./compose/moto/service.yml
+  - ./compose/nginx/service.yml
+
+services: {}
+
+networks:
+  jiva-network:
+    driver: bridge

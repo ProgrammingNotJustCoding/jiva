@@ -1,0 +1,33 @@
+# EditorConfig is awesome: https://editorconfig.org
+
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+[*.{js,ts}]
+charset = utf-8
+
+[*.{py,sh}]
+charset = utf-8
+
+[*.{json,yml}]
+charset = utf-8
+
+[*.{md}]
+charset = utf-8
+
+[Makefile]
+indent_style = tab
+
+[lib/**.js]
+indent_style = space
+indent_size = 2
+
+[bin/**]
+indent_style = space
+
+[{package.json,.travis.yml}]
+indent_style = space
+indent_size = 2
