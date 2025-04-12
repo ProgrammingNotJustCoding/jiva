@@ -1,10 +1,14 @@
 name: jiva
 
 include:
-  - ./compose/moto/service.yml
   - ./compose/nginx/service.yml
+  - ./compose/postgres/service.yml
 
 services: {}
+
+volumes:
+  postgres_data:
+    driver: local
 
 networks:
   jiva-network:

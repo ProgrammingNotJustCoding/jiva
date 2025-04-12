@@ -1,5 +1,5 @@
 import pinoModule from "pino"
-import { env } from "./env.js"
+import { env } from "./env.ts"
 
 const pino = pinoModule.default || pinoModule
 

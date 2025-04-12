@@ -1,6 +1,6 @@
 import type { Context, Next } from "hono";
 
-import logger from "../../config/logger.js";
+import logger from "../../config/logger.ts";
 
 const loggingMiddleware = async (c: Context, next: Next) => {
   const startTime = Date.now();

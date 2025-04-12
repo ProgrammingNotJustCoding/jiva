@@ -1,10 +1,10 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 
-import { env } from './config/env.js'
-import logger from './config/logger.js'
-import loggingMiddleware from './api/middlewares/logging.middleware.js'
-import router from './api/routes/routes.js'
+import { env } from './config/env.ts'
+import logger from './config/logger.ts'
+import loggingMiddleware from './api/middlewares/logging.middleware.ts'
+import router from './api/routes/routes.ts'
 
 const app = new Hono()
 
