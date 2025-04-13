@@ -1,0 +1,24 @@
+meta {
+  name: create-shift
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{BaseUrl}}/shifts
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "supervisorId": "1",
+    "startTime": "2025-04-13T20:13:28.187Z",
+    "status": "to_begin",
+    "workers": [
+      { "id": "2" },
+      { "id": "4" },
+      { "id": "5" }
+    ]
+  }
+}

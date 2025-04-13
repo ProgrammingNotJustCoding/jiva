@@ -1,0 +1,17 @@
+meta {
+  name: update-shift
+  type: http
+  seq: 11
+}
+
+put {
+  url: {{BaseUrl}}/shifts/8
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "nextSupervisorId": "5"
+  }
+}

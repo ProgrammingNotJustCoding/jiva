@@ -9,24 +9,33 @@ export const insertShiftWorker = async (
   supervisorId: number,
   workerId: number,
 ) => {
-  const [newWorker] = await tx
-    .insert(shiftWorkers)
-    .values({
-      supervisorId,
-      shiftId,
-      workerId,
-    })
-    .returning();
-  if (!newWorker) {
-    throw new Error("Failed to insert shift worker");
-  }
+  try {
+    const [newWorker] = await tx
+      .insert(shiftWorkers)
+      .values({
+        supervisorId,
+        shiftId,
+        workerId,
+      })
+      .returning();
+    if (!newWorker) {
+      throw new Error("Failed to insert shift worker");
+    }
 
-  return newWorker;
+    return newWorker;
+  } catch (e) {
+    throw new Error(`Failed to insert shift worker: ${e}`);
+  }
 };
 
 export const getWorkersByShiftId = async (shiftId: number) => {
   const workers = await db
-    .select()
+    .select({
+      id: shiftWorkers.id,
+      supervisorId: shiftWorkers.supervisorId,
+      shiftId: shiftWorkers.shiftId,
+      workerId: shiftWorkers.workerId,
+    })
     .from(shiftWorkers)
     .where(eq(shiftWorkers.shiftId, shiftId));
 

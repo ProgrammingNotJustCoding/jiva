@@ -1,5 +1,5 @@
 CREATE TYPE "public"."category" AS ENUM('operation', 'equipment', 'safety', 'instruction', 'personnel', 'environment', 'other');--> statement-breakpoint
-CREATE TYPE "public"."status" AS ENUM('ongoing', 'ready_for_handover', 'handed_over', 'acknowledged');--> statement-breakpoint
+CREATE TYPE "public"."status" AS ENUM('to_begin', 'ongoing', 'ready_for_handover', 'handed_over', 'acknowledged');--> statement-breakpoint
 CREATE TABLE "user_details" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
@@ -10,7 +10,8 @@ CREATE TABLE "user_details" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"deleted_at" timestamp,
-	"is_deleted" boolean DEFAULT false NOT NULL
+	"is_deleted" boolean DEFAULT false NOT NULL,
+	CONSTRAINT "user_details_user_id_unique" UNIQUE("user_id")
 );
 --> statement-breakpoint
 CREATE TABLE "shift_logs" (

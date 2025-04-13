@@ -3,6 +3,7 @@ import { z } from "zod";
 import { errors } from "../constants/errors.ts";
 import logger from "../../config/logger.ts";
 import {
+  getUsersDetailsByDesignation,
   getUserDetailsById,
   insertUserDetails,
   softDeleteUserDetails,
@@ -56,7 +57,7 @@ export const postUserDetails = async (c: Context) => {
 };
 
 export const getUserDetails = async (c: Context) => {
-  const userId = Number(c.req.param("userId"));
+  const userId = Number(c.req.param("id"));
 
   try {
     const userDetails = await getUserDetailsById(userId);
@@ -78,8 +79,40 @@ export const getUserDetails = async (c: Context) => {
   }
 };
 
+export const getUsersByDesignation = async (c: Context) => {
+  const designation = c.req.query("d");
+  if (!designation) {
+    return c.json(
+      {
+        error: errors[400],
+        details: "Missing designation parameter",
+      },
+      400,
+    );
+  }
+
+  try {
+    const userDetails = await getUsersDetailsByDesignation(designation);
+    return c.json(
+      {
+        data: userDetails,
+      },
+      200,
+    );
+  } catch (e) {
+    logger.error(`Error getting user details by designation: ${e}`);
+    return c.json(
+      {
+        error: errors[500],
+        details: `Error getting user details by designation: ${e}`,
+      },
+      500,
+    );
+  }
+};
+
 export const putUserDetails = async (c: Context) => {
-  const userId = Number(c.req.param("userId"));
+  const userId = Number(c.req.param("id"));
   const body = await c.req.json();
 
   const bodySchema = z.object({
@@ -127,7 +160,7 @@ export const putUserDetails = async (c: Context) => {
 };
 
 export const deleteUserDetails = async (c: Context) => {
-  const userId = Number(c.req.param("userId"));
+  const userId = Number(c.req.param("id"));
 
   try {
     await softDeleteUserDetails(userId);

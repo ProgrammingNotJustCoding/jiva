@@ -15,6 +15,7 @@ import {
 } from "../controllers/logs.controller.ts";
 import {
   deleteUserDetails,
+  getUsersByDesignation,
   getUserDetails,
   postUserDetails,
   putUserDetails,
@@ -37,14 +38,15 @@ shiftRouter.delete("/:id", deleteShift);
 export const logRouter = new Hono();
 
 logRouter.post("/", postLog);
-logRouter.get("/", getShiftLogs);
-logRouter.get("/:id", getShiftWorkerLogs);
+logRouter.get("/:id", getShiftLogs);
+logRouter.get("/:id/:workerId", getShiftWorkerLogs);
 logRouter.put("/:id", putLog);
 logRouter.delete("/:id", deleteLog);
 
 export const detailsRouter = new Hono();
 
 detailsRouter.post("/", postUserDetails);
+detailsRouter.get("/designation", getUsersByDesignation);
 detailsRouter.get("/:id", getUserDetails);
 detailsRouter.put("/:id", putUserDetails);
 detailsRouter.delete("/:id", deleteUserDetails);

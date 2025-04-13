@@ -82,7 +82,7 @@ export const getShiftLogs = async (c: Context) => {
 
 export const getShiftWorkerLogs = async (c: Context) => {
   const shiftId = Number(c.req.param("id"));
-  const workerId = Number(c.req.query("workerId"));
+  const workerId = Number(c.req.param("workerId"));
 
   try {
     const logs = await getLogsByShiftAndWorkerId(shiftId, workerId);

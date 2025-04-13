@@ -1,0 +1,20 @@
+meta {
+  name: create-log
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{BaseUrl}}/logs
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "shiftId": "8",
+    "workerId": "2",
+    "category": "operation",
+    "details": "Im a noooob"
+  }
+}

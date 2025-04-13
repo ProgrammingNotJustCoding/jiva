@@ -1,5 +1,5 @@
 {
-  "id": "36f8755b-6a1e-4012-b3bd-b2232061fc47",
+  "id": "67c35122-ffd1-41b4-8d56-dc87e22451f7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -75,7 +75,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "user_details_user_id_unique": {
+          "name": "user_details_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -429,6 +437,7 @@
       "name": "status",
       "schema": "public",
       "values": [
+        "to_begin",
         "ongoing",
         "ready_for_handover",
         "handed_over",

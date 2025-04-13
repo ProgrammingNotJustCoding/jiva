@@ -6,7 +6,6 @@ import logger from "../../config/logger.ts";
 import {
   getCurrentShiftBySupervisor,
   getShiftsBySupervisor,
-  insertShift,
   insertShiftData,
   softDeleteShift,
   updateShift,
@@ -21,6 +20,7 @@ export const postShift = async (c: Context) => {
     endTime: z.string().datetime().optional(),
     nextSupervisorId: z.string().optional(),
     status: z.enum([
+      "to_begin",
       "ongoing",
       "ready_for_handover",
       "handed_over",
@@ -28,7 +28,7 @@ export const postShift = async (c: Context) => {
     ]),
     finalizedAt: z.string().datetime().optional(),
     acknowledgedAt: z.string().datetime().optional(),
-    workers: z.array(z.object({ id: z.number() })),
+    workers: z.array(z.object({ id: z.string() })),
   });
 
   const parsedBody = bodySchema.safeParse(body);
@@ -56,7 +56,7 @@ export const postShift = async (c: Context) => {
       : null,
   };
   const workers = parsedBody.data.workers.map((worker) => ({
-    id: worker.id,
+    id: Number(worker.id),
   }));
 
   try {
@@ -67,6 +67,7 @@ export const postShift = async (c: Context) => {
     return c.json(
       {
         error: errors[500],
+        details: `Error creating shift: ${e}`,
       },
       500,
     );
@@ -113,7 +114,7 @@ export const getSupervisorShifts = async (c: Context) => {
 };
 
 export const getOngoingShift = async (c: Context) => {
-  const supervisorId = c.req.query("supervisorId");
+  const supervisorId = c.req.param("id");
   if (!supervisorId) {
     return c.json(
       {
@@ -145,7 +146,7 @@ export const getOngoingShift = async (c: Context) => {
 };
 
 export const putShift = async (c: Context) => {
-  const shiftId = c.req.param("shiftId");
+  const shiftId = c.req.param("id");
   const body = await c.req.json();
 
   const bodySchema = z.object({
@@ -153,7 +154,15 @@ export const putShift = async (c: Context) => {
     nextSupervisorId: z.string().optional(),
     startTime: z.string().optional(),
     endTime: z.string().optional(),
-    status: z.enum(["pending", "approved", "rejected"]).optional(),
+    status: z
+      .enum([
+        "to_begin",
+        "ongoing",
+        "ready_for_handover",
+        "handed_over",
+        "acknowledged",
+      ])
+      .optional(),
   });
 
   const parsedBody = bodySchema.safeParse(body);
@@ -202,7 +211,7 @@ export const putShift = async (c: Context) => {
 };
 
 export const deleteShift = async (c: Context) => {
-  const shiftId = c.req.param("shiftId");
+  const shiftId = c.req.param("id");
 
   try {
     await softDeleteShift(Number(shiftId));

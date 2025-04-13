@@ -9,6 +9,7 @@ import {
 import { userDetails } from "./details.schema.ts";
 
 export const statusEnum = pgEnum("status", [
+  "to_begin",
   "ongoing",
   "ready_for_handover",
   "handed_over",

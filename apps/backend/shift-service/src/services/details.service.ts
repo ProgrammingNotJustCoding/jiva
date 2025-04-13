@@ -26,6 +26,25 @@ export const getUserDetailsById = async (userId: number) => {
     throw new Error("Failed to fetch user details");
   }
 
+  return {
+    ...fetchUserDetails,
+    createdAt: undefined,
+    updatedAt: undefined,
+    deletedAt: undefined,
+    isDeleted: undefined,
+  };
+};
+
+export const getUsersDetailsByDesignation = async (designation: string) => {
+  const fetchUserDetails = await db
+    .select({
+      id: userDetails.id,
+      firstName: userDetails.firstName,
+      lastName: userDetails.lastName,
+    })
+    .from(userDetails)
+    .where(eq(userDetails.designation, designation));
+
   return fetchUserDetails;
 };
 

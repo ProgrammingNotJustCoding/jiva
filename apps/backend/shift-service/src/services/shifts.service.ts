@@ -11,6 +11,7 @@ export const insertShift = async (tx: any, shift: InsertShift) => {
   const [newShift] = await tx.insert(shifts).values(shift).returning();
 
   if (!newShift) {
+    console.error(`Failed to insert shift: ${shift}`);
     throw new Error("Failed to insert shift");
   }
 
@@ -35,8 +36,8 @@ export const insertShiftData = async (
         shiftWorkers.push(worker.id);
       }
     } catch (e) {
-      tx.rollback();
-      throw new Error("Failed to insert shift data");
+      console.error("Transaction failed:", e);
+      throw new Error(`Failed to insert shift data: ${e}`);
     }
   });
 
@@ -71,6 +72,10 @@ export const getCurrentShiftBySupervisor = async (supervisorId: number) => {
 
   return {
     ...getCurrentShift,
+    createdAt: undefined,
+    updatedAt: undefined,
+    deletedAt: undefined,
+    isDeleted: undefined,
     workers: getWorkers,
   };
 };
@@ -100,7 +105,7 @@ export const updateShift = async (
 export const softDeleteShift = async (shiftId: number) => {
   const [deletedShift] = await db
     .update(shifts)
-    .set({ deletedAt: new Date() })
+    .set({ deletedAt: new Date(), isDeleted: true })
     .where(eq(shifts.id, shiftId))
     .returning();
 
