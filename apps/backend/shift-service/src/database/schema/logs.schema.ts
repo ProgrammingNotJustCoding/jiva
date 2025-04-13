@@ -8,6 +8,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { shifts } from "./shifts.schema.ts";
+import { userDetails } from "./details.schema.ts";
 
 export const categoryEnum = pgEnum("category", [
   "operation",
@@ -24,7 +25,9 @@ export const shiftLogs = pgTable("shift_logs", {
   shiftId: integer("shift_id")
     .notNull()
     .references(() => shifts.id),
-  workerId: integer("worker_id").notNull(),
+  workerId: integer("worker_id")
+    .notNull()
+    .references(() => userDetails.id),
   category: categoryEnum("category").notNull(),
   details: text("details").notNull(),
   relatedEquipment: text("related_equipment"),

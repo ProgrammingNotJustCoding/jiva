@@ -4,9 +4,10 @@ import { errors } from "../constants/errors.ts";
 import type { InsertShift } from "../../database/types.ts";
 import logger from "../../config/logger.ts";
 import {
-  getCurrentShift,
+  getCurrentShiftBySupervisor,
   getShiftsBySupervisor,
   insertShift,
+  insertShiftData,
   softDeleteShift,
   updateShift,
 } from "../../services/shifts.service.ts";
@@ -18,6 +19,7 @@ export const postShift = async (c: Context) => {
     supervisorId: z.string(),
     startTime: z.string().datetime(),
     endTime: z.string().datetime().optional(),
+    nextSupervisorId: z.string().optional(),
     status: z.enum([
       "ongoing",
       "ready_for_handover",
@@ -26,6 +28,7 @@ export const postShift = async (c: Context) => {
     ]),
     finalizedAt: z.string().datetime().optional(),
     acknowledgedAt: z.string().datetime().optional(),
+    workers: z.array(z.object({ id: z.number() })),
   });
 
   const parsedBody = bodySchema.safeParse(body);
@@ -52,9 +55,12 @@ export const postShift = async (c: Context) => {
       ? new Date(parsedBody.data.acknowledgedAt)
       : null,
   };
+  const workers = parsedBody.data.workers.map((worker) => ({
+    id: worker.id,
+  }));
 
   try {
-    await insertShift(shiftData);
+    await insertShiftData(shiftData, workers);
     return c.text("OK", 201);
   } catch (e) {
     logger.error("Error creating shift", e);
@@ -90,9 +96,7 @@ export const getSupervisorShifts = async (c: Context) => {
     );
     return c.json(
       {
-        data: {
-          shifts,
-        },
+        data: shifts,
       },
       200,
     );
@@ -121,12 +125,10 @@ export const getOngoingShift = async (c: Context) => {
   }
 
   try {
-    const shift = await getCurrentShift(Number(supervisorId));
+    const shift = await getCurrentShiftBySupervisor(Number(supervisorId));
     return c.json(
       {
-        data: {
-          shift,
-        },
+        data: shift,
       },
       200,
     );
@@ -148,6 +150,7 @@ export const putShift = async (c: Context) => {
 
   const bodySchema = z.object({
     supervisorId: z.string().optional(),
+    nextSupervisorId: z.string().optional(),
     startTime: z.string().optional(),
     endTime: z.string().optional(),
     status: z.enum(["pending", "approved", "rejected"]).optional(),
@@ -169,6 +172,9 @@ export const putShift = async (c: Context) => {
 
   if (parsedBody.data.supervisorId) {
     updateShiftData.supervisorId = parsedBody.data.supervisorId;
+  }
+  if (parsedBody.data.nextSupervisorId) {
+    updateShiftData.nextSupervisorId = parsedBody.data.nextSupervisorId;
   }
   if (parsedBody.data.startTime) {
     updateShiftData.startTime = parsedBody.data.startTime;

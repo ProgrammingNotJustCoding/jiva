@@ -1,16 +1,46 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "../database/db.ts";
 import { shifts } from "../database/schema/shifts.schema.ts";
-import type { InsertShift } from "../database/types.ts";
+import type { InsertShift, InsertShiftWorkers } from "../database/types.ts";
+import {
+  getWorkersByShiftId,
+  insertShiftWorker,
+} from "./shiftWorker.service.ts";
 
-export const insertShift = async (shift: InsertShift) => {
-  const [newShift] = await db.insert(shifts).values(shift).returning();
+export const insertShift = async (tx: any, shift: InsertShift) => {
+  const [newShift] = await tx.insert(shifts).values(shift).returning();
 
   if (!newShift) {
     throw new Error("Failed to insert shift");
   }
 
   return newShift;
+};
+
+export const insertShiftData = async (
+  shift: InsertShift,
+  workers: Array<{ id: number }>,
+) => {
+  const newShiftData = await db.transaction(async (tx) => {
+    try {
+      const newShift = await insertShift(tx, shift);
+      const shiftWorkers = [];
+      for (const worker of workers) {
+        await insertShiftWorker(
+          tx,
+          newShift.id,
+          newShift.supervisorId,
+          worker.id,
+        );
+        shiftWorkers.push(worker.id);
+      }
+    } catch (e) {
+      tx.rollback();
+      throw new Error("Failed to insert shift data");
+    }
+  });
+
+  return newShiftData;
 };
 
 export const getShiftsBySupervisor = async (
@@ -29,14 +59,20 @@ export const getShiftsBySupervisor = async (
   return getShifts;
 };
 
-export const getCurrentShift = async (supervisorId: number) => {
+export const getCurrentShiftBySupervisor = async (supervisorId: number) => {
   const [getCurrentShift] = await db
     .select()
     .from(shifts)
     .where(eq(shifts.supervisorId, supervisorId))
-    .limit(1);
+    .limit(1)
+    .orderBy(desc(shifts.createdAt));
 
-  return getCurrentShift;
+  const getWorkers = await getWorkersByShiftId(getCurrentShift.id);
+
+  return {
+    ...getCurrentShift,
+    workers: getWorkers,
+  };
 };
 
 export const updateShift = async (
