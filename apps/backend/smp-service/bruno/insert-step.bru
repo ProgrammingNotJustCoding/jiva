@@ -1,0 +1,22 @@
+meta {
+  name: insert-step
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{BaseUrl}}/controls/step
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "controlPlanId": "1",
+    "steps": [
+      {
+        "description": "Mobile phone shall not be used."
+      }
+    ]
+  }
+}
