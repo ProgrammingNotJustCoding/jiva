@@ -1,0 +1,19 @@
+meta {
+  name: upload-smp-document
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{BaseUrl}}/documents
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  title: smp-document-1
+  file: @file()
+  version: 1
+  approvalStatus: draft
+  isActive: true
+}

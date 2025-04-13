@@ -1,0 +1,17 @@
+meta {
+  name: update-hazard
+  type: http
+  seq: 10
+}
+
+put {
+  url: {{BaseUrl}}/hazards/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "category": "mining"
+  }
+}

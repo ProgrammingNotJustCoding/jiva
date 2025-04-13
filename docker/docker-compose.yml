@@ -1,6 +1,7 @@
 name: jiva
 
 include:
+  - ./compose/minio/service.yml
   - ./compose/nginx/service.yml
   - ./compose/postgres/service.yml
 
@@ -8,6 +9,8 @@ services: {}
 
 volumes:
   postgres_data:
+    driver: local
+  minio_data:
     driver: local
 
 networks:

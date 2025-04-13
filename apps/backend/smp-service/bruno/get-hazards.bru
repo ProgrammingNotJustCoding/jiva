@@ -1,0 +1,18 @@
+meta {
+  name: get-hazards
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{BaseUrl}}/hazards?category=mining&smpDocumentId=1&page=1&limit=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  category: mining
+  smpDocumentId: 1
+  page: 1
+  limit: 10
+}
