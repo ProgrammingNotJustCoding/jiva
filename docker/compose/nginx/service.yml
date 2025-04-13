@@ -1,6 +1,7 @@
 services:
   nginx:
     image: nginx:latest
+    container_name: jiva-nginx
     ports:
       - "80:80"
     volumes:
