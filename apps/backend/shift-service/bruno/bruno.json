@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "jiva-shift",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
