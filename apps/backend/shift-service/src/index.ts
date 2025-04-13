@@ -1,15 +1,31 @@
-import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
 
-const app = new Hono()
+import { env } from "./config/env.ts";
+import logger from "./config/logger.ts";
+import loggingMiddleware from "./api/middlewares/logging.middleware.ts";
+import {
+  detailsRouter,
+  logRouter,
+  router,
+  shiftRouter,
+} from "./api/routes/routes.ts";
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+const app = new Hono();
 
-serve({
-  fetch: app.fetch,
-  port: 3000
-}, (info) => {
-  console.log(`Server is running on http://localhost:${info.port}`)
-})
+app.use(loggingMiddleware);
+
+app.route("/api", router);
+app.route("/api/shifts", shiftRouter);
+app.route("/api/logs", logRouter);
+app.route("/api/details", detailsRouter);
+
+serve(
+  {
+    fetch: app.fetch,
+    port: env.PORT,
+  },
+  (info) => {
+    logger.info(`Server is running on http://localhost:${info.port}`);
+  },
+);

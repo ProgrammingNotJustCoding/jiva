@@ -1,0 +1,11 @@
+meta {
+  name: get-current-shift
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{BaseUrl}}/shifts/1
+  body: none
+  auth: inherit
+}
