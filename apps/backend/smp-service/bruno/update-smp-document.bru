@@ -1,0 +1,17 @@
+meta {
+  name: update-smp-document
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{BaseUrl}}/documents/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "isActive": false
+  }
+}

@@ -1,9 +1,17 @@
 import { Hono } from "hono";
+import { deleteDocument, getDocument, getDocuments, updateDocument, uploadDocument } from "../controllers/document.controller.ts";
 
-const router = new Hono()
+export const router = new Hono()
 
 router.get("/health", async(c) => {
     return c.text("OK");
 })
 
-export default router
+export const documentRouter = new Hono();
+
+documentRouter.post("/", uploadDocument);
+documentRouter.get("/", getDocuments);
+documentRouter.get("/:id", getDocument);
+documentRouter.put("/:id", updateDocument);
+documentRouter.delete("/:id", deleteDocument);
+

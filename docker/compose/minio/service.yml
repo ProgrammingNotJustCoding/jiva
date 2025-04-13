@@ -1,0 +1,35 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: jiva-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: password
+      MINIO_REGION: us-east-1
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - jiva-network
+    
+  minio-client:
+    image: minio/mc:latest
+    container_name: jiva-minio-client
+    restart: "no"
+    depends_on:
+      - minio
+    volumes:
+      - ./config:/config
+    entrypoint: >
+      sh -c "
+        sleep 10;
+        mc alias set local http://jiva-minio:9000 user password &&
+        mc mb --ignore-existing local/smp-bucket &&
+        mc policy set-json /config/minio-policy.json local/smp-bucket || echo 'Policy application failed but continuing...'
+      "
+    networks:
+      - jiva-network
