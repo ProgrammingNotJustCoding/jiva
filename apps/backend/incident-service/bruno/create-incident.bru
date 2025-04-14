@@ -1,0 +1,26 @@
+meta {
+  name: create-incident
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{BaseUrl}}/incidents
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  shiftId: 8
+  reportType: hazard
+  reporttedByUserId: 2
+  locationDescription: Deep in sector 2
+  gpsLatitude: 12
+  gpsLongitude: 90
+  description: Faulty ledge region observed in sector 2
+  initialSeverity: medium
+  status: reported
+  rootCause: unknown
+  attachments-1: @file(/Users/rishiviswanathan/Desktop/Screenshot 2025-04-13 at 11.29.32 AM.png)
+  attachments-2: @file(/Users/rishiviswanathan/Desktop/Screenshot 2025-04-03 at 9.06.08 PM.png)
+}
