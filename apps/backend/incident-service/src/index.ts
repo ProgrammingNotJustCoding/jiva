@@ -4,8 +4,16 @@ import loggingMiddleware from "./api/middlewares/logging.middleware.ts";
 import { router } from "./api/routes/routes.ts";
 import { env } from "./config/env.ts";
 import logger from "./config/logger.ts";
+import { initializeBucket } from "./services/minio.service.ts";
 
 const app = new Hono();
+
+initializeBucket()
+  .then(() => logger.info("MinIO bucket initialized successfully"))
+  .catch((err) => {
+    logger.error("Failed to initialize MinIO bucket:", err);
+    process.exit(1);
+  });
 
 app.use(loggingMiddleware);
 
