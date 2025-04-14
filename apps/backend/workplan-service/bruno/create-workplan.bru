@@ -1,0 +1,40 @@
+meta {
+  name: create-workplan
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{BaseUrl}}/workplans
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "incidentId": "1",
+    "hazardId": "1",
+    "steps": [
+      {
+        "id": "1",
+        "taskDescription": "step 1 hehe",
+        "workers": [
+          {
+            "id": "2",
+            "name": "Worker1"
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "taskDescription": "step 2 hehe",
+        "workers": [
+          {
+            "id": "3",
+            "name": "Worker2"
+          }
+        ]
+      }
+    ]
+  }
+}
