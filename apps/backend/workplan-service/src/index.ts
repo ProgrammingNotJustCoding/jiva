@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { router } from "./api/routes/routes.ts";
+import { router, tasksRouter, workplanRouter } from "./api/routes/routes.ts";
 import { env } from "./config/env.ts";
 import logger from "./config/logger.ts";
 import loggingMiddleware from "./api/middlewares/logging.middleware.ts";
@@ -10,6 +10,8 @@ const app = new Hono();
 app.use(loggingMiddleware);
 
 app.route("/api", router);
+app.route("/api/workplans", workplanRouter);
+app.route("/api/tasks", tasksRouter);
 
 app.notFound(async (c) => {
   return c.json(
