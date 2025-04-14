@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import loggingMiddleware from "./api/middlewares/logging.middleware.ts";
-import { router } from "./api/routes/routes.ts";
+import { incidentRouter, reportRouter, router } from "./api/routes/routes.ts";
 import { env } from "./config/env.ts";
 import logger from "./config/logger.ts";
 import { initializeBucket } from "./services/minio.service.ts";
@@ -18,7 +18,8 @@ initializeBucket()
 app.use(loggingMiddleware);
 
 app.route("/api", router);
-
+app.route("/api/incidents", incidentRouter);
+app.route("/api/reports", reportRouter);
 app.notFound(async (c) => {
   return c.json(
     {

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../database/db.ts";
-import { incidents, incidents } from "../database/schema/incidents.schema.ts";
+import { incidents } from "../database/schema/incidents.schema.ts";
 import type { InsertIncident } from "../database/types.ts";
 import { uploadAttachment } from "./attachments.service.ts";
 
@@ -60,5 +60,5 @@ export const getIncidentsByShiftId = async (
     .limit(limit)
     .offset(offset);
 
-  return incidents;
+  return getIncidents;
 };
