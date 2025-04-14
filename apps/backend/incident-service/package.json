@@ -2,11 +2,20 @@
   "name": "incident-service",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
-    "hono": "^4.7.6"
+    "dotenv": "^16.5.0",
+    "drizzle-kit": "^0.30.6",
+    "drizzle-orm": "^0.41.0",
+    "hono": "^4.7.6",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "postgres": "^3.4.5",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
