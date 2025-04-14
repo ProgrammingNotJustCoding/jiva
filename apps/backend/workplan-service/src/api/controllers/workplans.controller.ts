@@ -43,6 +43,7 @@ export const postWorkplan = async (c: Context) => {
 
   const controlProcedures = parsedBody.data.steps.map((step) => ({
     id: Number(step.id),
+    taskDescription: step.taskDescription,
     workers: step.workers.map((worker) => ({
       id: Number(worker.id),
       name: worker.name,
@@ -62,16 +63,20 @@ export const postWorkplan = async (c: Context) => {
 };
 
 export const getIncidentWorkplan = async (c: Context) => {
-  const incidentId = Number(c.req.query("incidentId"));
+  const incidentId = Number(c.req.param("incidentId"));
+  console.log(`Fetching workplan for incident ${incidentId}`);
 
   try {
     const workplan = await getWorkplanByIncidentId(incidentId);
     return c.json(workplan);
   } catch (e) {
     logger.error(`Error getting workplan: ${e}`);
-    return c.json({
-      error: errors[500],
-      details: `Error getting workplan: ${e}`,
-    });
+    return c.json(
+      {
+        error: errors[500],
+        details: `Error getting workplan: ${e}`,
+      },
+      500,
+    );
   }
 };

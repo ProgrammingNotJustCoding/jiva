@@ -11,10 +11,7 @@ import type {
 } from "../database/types.ts";
 import { insertAssignedWorker } from "./assignedWorkers.service.ts";
 import { insertWorkplanTask } from "./tasks.service.ts";
-import {
-  assignedWorkers,
-  assignedWorkers,
-} from "../database/schema/assignedWorkers.schema.ts";
+import { assignedWorkers } from "../database/schema/assignedWorkers.schema.ts";
 
 export const insertWorkplan = async (tx: any, workplanData: InsertWorkplan) => {
   const [newWorkplan] = await tx
@@ -33,7 +30,7 @@ export const createWorkplan = async (
   workPlanData: InsertWorkplan,
   controlProcedures: Array<{
     id: number;
-    description: string;
+    taskDescription: string;
     workers: Array<{ id: number; name: string }>;
   }>,
 ) => {
@@ -45,7 +42,7 @@ export const createWorkplan = async (
         const taskData: InsertTask = {
           workplanId: newWorkplan.id,
           controlProcedureId: controlProcedure.id,
-          taskDescription: controlProcedure.description,
+          taskDescription: controlProcedure.taskDescription,
           status: "pending",
         };
 

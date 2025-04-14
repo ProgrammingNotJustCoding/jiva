@@ -1,0 +1,11 @@
+meta {
+  name: get-worker-tasks
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{BaseUrl}}/tasks/workers/2
+  body: none
+  auth: inherit
+}
