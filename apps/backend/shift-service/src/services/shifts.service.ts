@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "../database/db.ts";
 import { shifts } from "../database/schema/shifts.schema.ts";
 import type { InsertShift, InsertShiftWorkers } from "../database/types.ts";
@@ -7,6 +7,7 @@ import {
   insertShiftWorker,
 } from "./shiftWorker.service.ts";
 import { userDetails } from "../database/schema/details.schema.ts";
+import { shiftWorkers } from "../database/schema/shiftWorkers.schema.ts";
 
 export const insertShift = async (tx: any, shift: InsertShift) => {
   const [newShift] = await tx.insert(shifts).values(shift).returning();
@@ -85,6 +86,89 @@ export const getCurrentShiftBySupervisor = async (supervisorId: number) => {
 
   let nextSupervisorDetails = null;
   if (currentShift && currentShift.nextSupervisorId) {
+    [nextSupervisorDetails] = await db
+      .select({
+        id: userDetails.userId,
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
+        phoneNumber: userDetails.phoneNumber,
+        designation: userDetails.designation,
+      })
+      .from(userDetails)
+      .where(eq(userDetails.userId, currentShift.nextSupervisorId));
+  }
+
+  const workers = await getWorkersByShiftId(currentShift.id);
+
+  return {
+    id: currentShift.id,
+    supervisorId: currentShift.supervisorId,
+    supervisor: {
+      id: currentShift.supervisorId,
+      firstName: currentShift.supervisorFirstName,
+      lastName: currentShift.supervisorLastName,
+      phoneNumber: currentShift.supervisorPhoneNumber,
+      designation: currentShift.supervisorDesignation,
+    },
+    nextSupervisorId: currentShift.nextSupervisorId,
+    nextSupervisor: nextSupervisorDetails,
+    startTime: currentShift.startTime,
+    endTime: currentShift.endTime,
+    status: currentShift.status,
+    finalizedAt: currentShift.finalizedAt,
+    acknowledgedAt: currentShift.acknowledgedAt,
+    workers: workers,
+  };
+};
+export const getCurrentShiftByWorker = async (workerId: number) => {
+  const [latestShiftWorker] = await db
+    .select({
+      shiftId: shiftWorkers.shiftId,
+    })
+    .from(shiftWorkers)
+    .where(
+      and(
+        eq(shiftWorkers.workerId, workerId),
+        eq(shiftWorkers.isDeleted, false),
+      ),
+    )
+    .orderBy(desc(shiftWorkers.createdAt))
+    .limit(1);
+
+  if (!latestShiftWorker) {
+    return null;
+  }
+
+  const [currentShift] = await db
+    .select({
+      id: shifts.id,
+      supervisorId: shifts.supervisorId,
+      nextSupervisorId: shifts.nextSupervisorId,
+      startTime: shifts.startTime,
+      endTime: shifts.endTime,
+      status: shifts.status,
+      finalizedAt: shifts.finalizedAt,
+      acknowledgedAt: shifts.acknowledgedAt,
+      supervisorFirstName: userDetails.firstName,
+      supervisorLastName: userDetails.lastName,
+      supervisorPhoneNumber: userDetails.phoneNumber,
+      supervisorDesignation: userDetails.designation,
+    })
+    .from(shifts)
+    .leftJoin(userDetails, eq(shifts.supervisorId, userDetails.userId))
+    .where(
+      and(
+        eq(shifts.id, latestShiftWorker.shiftId),
+        eq(shifts.isDeleted, false),
+      ),
+    );
+
+  if (!currentShift) {
+    return null;
+  }
+
+  let nextSupervisorDetails = null;
+  if (currentShift.nextSupervisorId) {
     [nextSupervisorDetails] = await db
       .select({
         id: userDetails.userId,

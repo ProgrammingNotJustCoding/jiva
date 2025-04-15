@@ -3,6 +3,7 @@ import {
   deleteShift,
   getOngoingShift,
   getSupervisorShifts,
+  getWorkerShift,
   postShift,
   putShift,
 } from "../controllers/shifts.controller.ts";
@@ -31,6 +32,7 @@ export const shiftRouter = new Hono();
 
 shiftRouter.post("/", postShift);
 shiftRouter.get("/", getSupervisorShifts);
+shiftRouter.get("/current-shift/worker/:id", getWorkerShift);
 shiftRouter.get("/current-shift/:id", getOngoingShift);
 shiftRouter.put("/:id", putShift);
 shiftRouter.delete("/:id", deleteShift);

@@ -5,6 +5,7 @@ import type { InsertShift } from "../../database/types.ts";
 import logger from "../../config/logger.ts";
 import {
   getCurrentShiftBySupervisor,
+  getCurrentShiftByWorker,
   getShiftsBySupervisor,
   insertShiftData,
   softDeleteShift,
@@ -107,6 +108,38 @@ export const getSupervisorShifts = async (c: Context) => {
       {
         error: errors[500],
         details: `Error fetching supervisor shifts: ${e}`,
+      },
+      500,
+    );
+  }
+};
+
+export const getWorkerShift = async (c: Context) => {
+  const workerId = c.req.param("id");
+  if (!workerId) {
+    return c.json(
+      {
+        error: errors[400],
+        details: "workerId is required",
+      },
+      400,
+    );
+  }
+
+  try {
+    const shift = await getCurrentShiftByWorker(Number(workerId));
+    return c.json(
+      {
+        data: shift,
+      },
+      200,
+    );
+  } catch (e) {
+    logger.error("Error fetching worker shift", e);
+    return c.json(
+      {
+        error: errors[500],
+        details: `Error fetching worker shift: ${e}`,
       },
       500,
     );

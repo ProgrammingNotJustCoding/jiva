@@ -1,0 +1,11 @@
+meta {
+  name: get-current-worker-shift
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{BaseUrl}}/shifts/current-shift/worker/16
+  body: none
+  auth: inherit
+}
