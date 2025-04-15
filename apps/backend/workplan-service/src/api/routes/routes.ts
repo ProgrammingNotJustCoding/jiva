@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import {
   getIncidentWorkplan,
   postWorkplan,
+  updateTask,
 } from "../controllers/workplans.controller.ts";
 import {
   getIncompleteTasks,
@@ -25,3 +26,4 @@ export const tasksRouter = new Hono();
 tasksRouter.get("/workers/:workerId", getWorkerTasks);
 tasksRouter.get("/incomplete/:workplanId", getIncompleteTasks);
 tasksRouter.get("/:workplanId", getWorkplanWorkers);
+tasksRouter.put("/:taskId", updateTask);

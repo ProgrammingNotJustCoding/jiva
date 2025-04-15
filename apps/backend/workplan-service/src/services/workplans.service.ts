@@ -102,3 +102,17 @@ export const getWorkplanByIncidentId = async (incidentId: number) => {
 
   return workplan;
 };
+
+export const updateTaskById = async (taskId: number, updateFields: any) => {
+  const updatedTask = await db
+    .update(workplanTasks)
+    .set(updateFields)
+    .where(eq(workplanTasks.id, taskId))
+    .returning();
+
+  if (!updatedTask) {
+    throw new Error(`Task with ID ${taskId} not found`);
+  }
+
+  return updatedTask;
+};

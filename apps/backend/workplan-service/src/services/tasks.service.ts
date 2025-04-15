@@ -19,6 +19,7 @@ export const insertWorkplanTask = async (
 export const getTasksByWorkerId = async (workerId: number) => {
   const tasks = await db
     .select({
+      id: workplanTasks.id,
       workplanId: workplanTasks.workplanId,
       taskDescription: workplanTasks.taskDescription,
       status: workplanTasks.status,

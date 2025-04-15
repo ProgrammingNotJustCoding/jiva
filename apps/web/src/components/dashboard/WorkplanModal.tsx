@@ -29,10 +29,14 @@ type ShiftWorker = {
 
 type Incident = {
   id: string;
-  reportType: string;
   description: string;
+  reportType: string;
   initialSeverity: string;
+  status: string;
   locationDescription: string;
+  rootCause: string | null;
+  createdAt: string;
+  reporttedByUserId: string;
 };
 
 type Hazard = {
@@ -76,7 +80,8 @@ const WorkplanModal: React.FC<WorkplanModalProps> = ({ incident, onClose }) => {
   const [selectedHazard, setSelectedHazard] = useState<Hazard | null>(null);
   const [controlPlan, setControlPlan] = useState<ControlPlan | null>(null);
   const [workers, setWorkers] = useState<ShiftWorker[]>([]);
-  const [assignedWorkers, setAssignedWorkers] = useState({});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [assignedWorkers, setAssignedWorkers] = useState<Record<number, any[]>>({});
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -96,7 +101,7 @@ const WorkplanModal: React.FC<WorkplanModalProps> = ({ incident, onClose }) => {
 
   useEffect(() => {
     if (step === 2 && selectedCategory) {
-      fetchHazards(selectedCategory, currentPage);
+      fetchHazards(selectedCategory);
     }
   }, [selectedCategory, currentPage, step]);
 
@@ -114,7 +119,7 @@ const WorkplanModal: React.FC<WorkplanModalProps> = ({ incident, onClose }) => {
     };
   }, []);
 
-  const fetchHazards = async (category: string, page: number) => {
+  const fetchHazards = async (category: string) => {
     setLoading(true);
     try {
       const response = await fetch(
@@ -136,8 +141,8 @@ const WorkplanModal: React.FC<WorkplanModalProps> = ({ incident, onClose }) => {
       const response = await fetch(`${SMP_API_URL}/controls/${hazardId}`);
       const result = await response.json();
       setControlPlan(result.data.controls.controlPlan);
-      const initialAssignments = {};
-      result.data.controls.controlPlan.steps.forEach((step) => {
+      const initialAssignments: Record<number, Array<{ id: string; name: string }>> = {};
+      result.data.controls.controlPlan.steps.forEach((step: ControlStep) => {
         initialAssignments[step.id] = [];
       });
       setAssignedWorkers(initialAssignments);
@@ -164,19 +169,19 @@ const WorkplanModal: React.FC<WorkplanModalProps> = ({ incident, onClose }) => {
     }
   };
 
-  const handleCategorySelect = (category) => {
+  const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
     setHazards([]);
     setStep(2);
   };
 
-  const handleHazardSelect = (hazard) => {
+  const handleHazardSelect = (hazard: Hazard) => {
     setSelectedHazard(hazard);
     setStep(3);
   };
 
-  const handleWorkerAssignment = (stepId, workerId) => {
+  const handleWorkerAssignment = (stepId: number, workerId: string) => {
     const worker = workers.find((w) => w.workerId.toString() === workerId);
 
     if (!worker) return;
@@ -193,6 +198,11 @@ const WorkplanModal: React.FC<WorkplanModalProps> = ({ incident, onClose }) => {
   };
 
   const handleSubmitWorkplan = async () => {
+    if (!controlPlan) {
+      alert("No control plan loaded. Please try again.");
+      return;
+    }
+    
     const allStepsAssigned = controlPlan.steps.every(
       (step) => assignedWorkers[step.id] && assignedWorkers[step.id].length > 0,
     );
@@ -207,6 +217,11 @@ const WorkplanModal: React.FC<WorkplanModalProps> = ({ incident, onClose }) => {
       taskDescription: step.description,
       workers: assignedWorkers[step.id],
     }));
+
+    if (!selectedHazard) {
+      alert("No hazard selected. Please try again.");
+      return;
+    }
 
     const payload = {
       incidentId: String(incident.id),
@@ -413,7 +428,7 @@ const WorkplanModal: React.FC<WorkplanModalProps> = ({ incident, onClose }) => {
                         Selected Hazard:
                       </h4>
                       <p className="text-gray-900">
-                        {selectedHazard.description}
+                        {selectedHazard?.description}
                       </p>
                     </div>
                     <div className="mt-3 md:mt-0">

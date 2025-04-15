@@ -12,11 +12,16 @@ class ApiConstants {
   static String get incidentBaseUrl =>
       'http://${host}:${dotenv.env['INCIDENT_PORT'] ?? '5004'}/api';
 
+  static String get workplanBaseUrl =>
+      'http://${host}:${dotenv.env['WORKPLAN_PORT'] ?? '5005'}/api';
+
   static const String signInEndpoint = "/auth/signin";
   static const String verifyEndpoint = "/auth/verify";
   static const String currentShiftEndpoint = "/shifts/current-shift";
   static const String logsEndpoint = "/logs";
   static const String incidentEndpoint = "/incidents";
+  static const String tasksEndpoint = "/tasks";
+  static const String workerTasksEndpoint = "/tasks/workers";
 }
 
 class StorageKeys {

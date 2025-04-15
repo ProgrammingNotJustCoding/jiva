@@ -49,7 +49,7 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
       status: "in_progress",
     },
   ]);
-  const [handoverStep, setHandoverStep] = useState("review"); // review, report, finalize
+  const [handoverStep, setHandoverStep] = useState("review"); 
   const [reportGenerated, setReportGenerated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,10 +63,6 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
   const handleMarkTaskUnfinished = async (taskId: number) => {
     setIsLoading(true);
     try {
-      // In a real application, you would use fetch or axios
-      // await fetch(`${API_URL}/tasks/${taskId}/mark-unfinished`, { method: 'PUT' });
-
-      // For demo purposes, we'll just update the local state
       setUnfinishedTasks(
         unfinishedTasks.map((task) =>
           task.id === taskId ? { ...task, status: "unfinished" } : task,
@@ -84,11 +80,6 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
   const handleGenerateReport = async () => {
     setIsLoading(true);
     try {
-      // In a real application, this would be a real API call
-      // const response = await fetch(`${API_URL}/reports/${shiftInfo.id}`);
-      // const report = await response.json();
-
-      // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setReportGenerated(true);
@@ -103,22 +94,11 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
   const handleFinalizeHandover = async () => {
     setIsLoading(true);
     try {
-      // In a real application, this would be a real API call
-      // await fetch(`${API_URL}/shifts/${shiftInfo.id}`, {
-      //   method: 'PUT',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ status: "handed_over" }),
-      // });
-
-      // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setHandoverStep("finalize");
       setTimeout(() => {
         setShowHandoverModal(false);
-        // In a real app, you might navigate away or show a success notification
       }, 2000);
     } catch (error) {
       console.error("Error finalizing handover:", error);

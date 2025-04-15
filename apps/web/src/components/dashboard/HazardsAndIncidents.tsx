@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { FaExclamationTriangle, FaPlus, FaInfo, FaTools } from "react-icons/fa";
 import WorkplanModal from "./WorkplanModal";
@@ -7,21 +8,32 @@ type Props = {
   shiftId: string;
 };
 
+type Incident = {
+  id: string;
+  description: string;
+  reportType: string;
+  initialSeverity: string;
+  status: string;
+  locationDescription: string;
+  rootCause: string | null;
+  createdAt: string;
+  reporttedByUserId: string;
+};
+
 const HazardsAndIncidents: React.FC<Props> = ({ shiftId }) => {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [showWorkplanModal, setShowWorkplanModal] = useState(false);
-  const [workerNames, setWorkerNames] = useState({});
+  const [workerNames, setWorkerNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Get worker information from localStorage
     const getWorkerInfo = () => {
       try {
         const shiftData = localStorage.getItem("shift-workers");
         if (shiftData) {
           const workers = JSON.parse(shiftData);
-          const namesMap = {};
+          const namesMap: Record<string, string> = {};
           workers.forEach((worker: any) => {
             namesMap[worker.id] = `${worker.firstName} ${worker.lastName}`;
           });
@@ -32,7 +44,6 @@ const HazardsAndIncidents: React.FC<Props> = ({ shiftId }) => {
       }
     };
 
-    // Fetch incidents from the API
     const fetchIncidents = async () => {
       if (!shiftId) {
         setLoading(false);
@@ -61,7 +72,7 @@ const HazardsAndIncidents: React.FC<Props> = ({ shiftId }) => {
     fetchIncidents();
   }, [shiftId]);
 
-  const getReporterName = (userId) => {
+  const getReporterName = (userId: string) => {
     return workerNames[userId] || `User #${userId}`;
   };
 
@@ -110,7 +121,7 @@ const HazardsAndIncidents: React.FC<Props> = ({ shiftId }) => {
     });
   };
 
-  const handleInitWorkplan = (incident) => {
+  const handleInitWorkplan = (incident: Incident) => {
     setSelectedIncident(incident);
     setShowWorkplanModal(true);
   };
@@ -156,7 +167,7 @@ const HazardsAndIncidents: React.FC<Props> = ({ shiftId }) => {
         </div>
       ) : (
         <div className="space-y-4">
-          {incidents.map((incident) => (
+          {incidents.map((incident: Incident) => (
             <div
               key={incident.id}
               className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
@@ -183,7 +194,7 @@ const HazardsAndIncidents: React.FC<Props> = ({ shiftId }) => {
                   <p className="text-gray-500 text-sm mt-1">
                     Reported by{" "}
                     {getReporterName(
-                      incident.reportedByUserId || incident.reporttedByUserId,
+                      incident.reporttedByUserId,
                     )}{" "}
                     • {formatDate(incident.createdAt)}
                   </p>
@@ -219,7 +230,7 @@ const HazardsAndIncidents: React.FC<Props> = ({ shiftId }) => {
         </div>
       )}
 
-      {showWorkplanModal && (
+      {showWorkplanModal && selectedIncident && (
         <WorkplanModal
           incident={selectedIncident}
           onClose={() => setShowWorkplanModal(false)}

@@ -87,12 +87,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     );
   }
 
-  // Use props if provided, otherwise use data from API
   const userRole = propUserRole || user?.role || "worker";
   const userName = propUserName || user?.name || "User";
   const userCode = user?.userCode || "";
 
-  // Map roles from API to component props if needed
   const mappedRole = userRole === "worker" ? "supervisor" : userRole;
 
   return (
