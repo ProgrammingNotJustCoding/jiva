@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../database/db.ts";
 import { shiftLogs } from "../database/schema/logs.schema.ts";
 import type { InsertLogs } from "../database/types.ts";
+import { userDetails } from "../database/schema/details.schema.ts";
 
 export const insertShiftLog = async (shiftLog: InsertLogs) => {
   const [newShiftLog] = await db.insert(shiftLogs).values(shiftLog).returning();
@@ -19,9 +20,28 @@ export const getLogsByShiftId = async (
   limit: number,
 ) => {
   const offset = (page - 1) * limit;
+
   const logs = await db
-    .select()
+    .select({
+      id: shiftLogs.id,
+      shiftId: shiftLogs.shiftId,
+      workerId: shiftLogs.workerId,
+      category: shiftLogs.category,
+      details: shiftLogs.details,
+      relatedEquipment: shiftLogs.relatedEquipment,
+      location: shiftLogs.location,
+      createdAt: shiftLogs.createdAt,
+      updatedAt: shiftLogs.updatedAt,
+      deletedAt: shiftLogs.deletedAt,
+      isDeleted: shiftLogs.isDeleted,
+      workerName: {
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
+      },
+      workerDesignation: userDetails.designation,
+    })
     .from(shiftLogs)
+    .innerJoin(userDetails, eq(shiftLogs.workerId, userDetails.userId))
     .where(eq(shiftLogs.shiftId, shiftId))
     .offset(offset)
     .limit(limit);

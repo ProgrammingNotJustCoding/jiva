@@ -5,6 +5,7 @@ import logger from "../../config/logger.ts";
 import {
   getIncidentsByShiftId,
   insertIncidentData,
+  updateIncidentData,
 } from "../../services/incidents.service.ts";
 import type { InsertIncident } from "../../database/types.ts";
 
@@ -144,6 +145,113 @@ export const getShiftIncidents = async (c: Context) => {
       {
         error: errors[500],
         details: `Error fetching incidents: ${e}`,
+      },
+      500,
+    );
+  }
+};
+
+export const updateIncident = async (c: Context) => {
+  const incidentId = Number(c.req.param("id"));
+
+  if (isNaN(incidentId) || incidentId <= 0) {
+    return c.json(
+      {
+        error: errors[400],
+        details: "Invalid incident ID",
+      },
+      400,
+    );
+  }
+
+  let body;
+  try {
+    body = await c.req.json();
+  } catch (e) {
+    return c.json(
+      {
+        error: errors[400],
+        details: "Invalid JSON in request body",
+      },
+      400,
+    );
+  }
+
+  const updateSchema = z.object({
+    shiftId: z.number().optional(),
+    reportType: z
+      .enum(["hazard", "near_miss", "accident", "environmental", "other"])
+      .optional(),
+    reporttedByUserId: z.number().optional(),
+    locationDescription: z.string().max(255).optional(),
+    gpsLatitude: z.string().min(-90).max(90).optional(),
+    gpsLongitude: z.string().min(-180).max(180).optional(),
+    description: z.string().max(255).optional(),
+    initialSeverity: z.enum(["low", "medium", "high", "critical"]).optional(),
+    status: z
+      .enum([
+        "reported",
+        "acknowledged",
+        "investigating",
+        "pending_actions",
+        "closed",
+        "cancelled",
+      ])
+      .optional(),
+    rootCause: z.string().optional(),
+  });
+
+  const parsedBody = updateSchema.safeParse(body);
+
+  if (!parsedBody.success) {
+    return c.json(
+      {
+        error: errors[400],
+        details: parsedBody.error.issues,
+      },
+      400,
+    );
+  }
+
+  const updateData: Partial<InsertIncident> = {};
+  Object.entries(parsedBody.data).forEach(([key, value]) => {
+    if (value !== undefined) {
+      updateData[key as keyof InsertIncident] = value;
+    }
+  });
+
+  if (Object.keys(updateData).length === 0) {
+    return c.json(
+      {
+        error: errors[400],
+        details: "No valid fields to update were provided",
+      },
+      400,
+    );
+  }
+
+  updateData.updatedAt = new Date();
+
+  try {
+    const updatedIncident = await updateIncidentData(incidentId, updateData);
+
+    if (!updatedIncident) {
+      return c.json(
+        {
+          error: errors[404],
+          details: "Incident not found",
+        },
+        404,
+      );
+    }
+
+    return c.text("OK", 200);
+  } catch (e) {
+    logger.error(`Error updating incident: ${e}`);
+    return c.json(
+      {
+        error: errors[500],
+        details: `Error updating incident: ${e}`,
       },
       500,
     );

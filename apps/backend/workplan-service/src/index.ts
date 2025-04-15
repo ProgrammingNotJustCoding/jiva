@@ -4,9 +4,11 @@ import { router, tasksRouter, workplanRouter } from "./api/routes/routes.ts";
 import { env } from "./config/env.ts";
 import logger from "./config/logger.ts";
 import loggingMiddleware from "./api/middlewares/logging.middleware.ts";
+import { cors } from "hono/cors";
 
 const app = new Hono();
 
+app.use(cors());
 app.use(loggingMiddleware);
 
 app.route("/api", router);

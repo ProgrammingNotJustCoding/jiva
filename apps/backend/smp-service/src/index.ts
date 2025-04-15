@@ -11,6 +11,7 @@ import {
 } from "./api/routes/routes.ts";
 import loggingMiddleware from "./api/middlewares/logging.middleware.ts";
 import { initializeBucket } from "./services/minio.service.ts";
+import { cors } from "hono/cors";
 
 const app = new Hono();
 
@@ -21,6 +22,7 @@ initializeBucket()
     logger.warn("Application continuing despite MinIO initialization failure");
   });
 
+app.use(cors());
 app.use(loggingMiddleware);
 
 app.route("/api", router);

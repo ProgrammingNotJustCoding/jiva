@@ -39,6 +39,13 @@ const CurrentShiftPage = () => {
 
         const data = await response.json();
         setShiftData(data.data);
+
+        if (data.data?.workers?.length) {
+          localStorage.setItem(
+            "shift-workers",
+            JSON.stringify(data.data.workers),
+          );
+        }
       } catch (err) {
         console.error("Failed to fetch shift data:", err);
         setError(String(err));
@@ -49,6 +56,56 @@ const CurrentShiftPage = () => {
 
     fetchCurrentShift();
   }, []);
+
+  useEffect(() => {
+    if (shiftData && shiftData.status === "to_begin") {
+      const checkAndUpdateShiftStatus = async () => {
+        const now = new Date();
+        const shiftStartTime = new Date(shiftData.startTime);
+
+        if (now >= shiftStartTime) {
+          try {
+            const response = await fetch(
+              `${SHIFT_API_URL}/shifts/${shiftData.id}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ status: "ongoing" }),
+              },
+            );
+
+            if (response.ok) {
+              setShiftData({
+                ...shiftData,
+                status: "ongoing",
+              });
+              console.log("Shift status updated to ongoing");
+            } else {
+              console.error(
+                "Failed to update shift status:",
+                await response.text(),
+              );
+            }
+          } catch (err) {
+            console.error("Error updating shift status:", err);
+          }
+        } else {
+          const timeUntilStart = shiftStartTime.getTime() - now.getTime();
+          if (timeUntilStart > 0 && timeUntilStart < 2147483647) {
+            const timerId = setTimeout(() => {
+              checkAndUpdateShiftStatus();
+            }, timeUntilStart);
+
+            return () => clearTimeout(timerId);
+          }
+        }
+      };
+
+      checkAndUpdateShiftStatus();
+    }
+  }, [shiftData]);
 
   const formatTime = (dateString: string) => {
     if (!dateString) return "Not set";
@@ -81,9 +138,9 @@ const CurrentShiftPage = () => {
       case "workers":
         return <ShiftWorkers workers={shiftData?.workers || []} />;
       case "logs":
-        return <ShiftLogs />;
+        return <ShiftLogs shiftId={shiftData?.id} />;
       case "hazards":
-        return <HazardsAndIncidents />;
+        return <HazardsAndIncidents shiftId={shiftData?.id} />;
       default:
         return <ShiftWorkers workers={shiftData?.workers || []} />;
     }

@@ -1,75 +1,71 @@
 import React, { useState, useEffect } from "react";
 import { FaExclamationTriangle, FaPlus, FaInfo, FaTools } from "react-icons/fa";
 import WorkplanModal from "./WorkplanModal";
+import { INCIDENT_API_URL } from "@/utils/constants";
 
-const HazardsAndIncidents = () => {
+type Props = {
+  shiftId: string;
+};
+
+const HazardsAndIncidents: React.FC<Props> = ({ shiftId }) => {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [showWorkplanModal, setShowWorkplanModal] = useState(false);
+  const [workerNames, setWorkerNames] = useState({});
 
   useEffect(() => {
-    // Simulating fetch from backend
-    const fetchIncidents = async () => {
+    // Get worker information from localStorage
+    const getWorkerInfo = () => {
       try {
-        // Mocked data for demonstration
-        const mockIncidents = [
-          {
-            id: "1",
-            reportType: "hazard",
-            reportedByUserId: "user123",
-            reportedByName: "John Doe",
-            locationDescription: "Main tunnel, section B-4",
-            gpsLatitude: "37.7749",
-            gpsLongitude: "-122.4194",
-            description: "Loose rocks observed on the ceiling of the tunnel",
-            initialSeverity: "medium",
-            status: "reported",
-            rootCause: "Natural erosion over time",
-            createdAt: "2025-04-12T10:30:00Z",
-          },
-          {
-            id: "2",
-            reportType: "near_miss",
-            reportedByUserId: "user456",
-            reportedByName: "Jane Smith",
-            locationDescription: "Conveyor belt area, near exit point",
-            gpsLatitude: "37.7750",
-            gpsLongitude: "-122.4195",
-            description: "Worker almost got caught in moving machinery",
-            initialSeverity: "high",
-            status: "investigating",
-            rootCause: "Inadequate safety barriers",
-            createdAt: "2025-04-13T08:15:00Z",
-          },
-          {
-            id: "3",
-            reportType: "environmental",
-            reportedByUserId: "user789",
-            reportedByName: "Robert Johnson",
-            locationDescription: "East side drainage area",
-            gpsLatitude: "37.7751",
-            gpsLongitude: "-122.4196",
-            description: "Unusual discoloration in water runoff",
-            initialSeverity: "critical",
-            status: "acknowledged",
-            rootCause: "Under investigation",
-            createdAt: "2025-04-13T14:45:00Z",
-          },
-        ];
+        const shiftData = localStorage.getItem("shift-workers");
+        if (shiftData) {
+          const workers = JSON.parse(shiftData);
+          const namesMap = {};
+          workers.forEach((worker: any) => {
+            namesMap[worker.id] = `${worker.firstName} ${worker.lastName}`;
+          });
+          setWorkerNames(namesMap);
+        }
+      } catch (error) {
+        console.error("Error parsing worker data from localStorage:", error);
+      }
+    };
 
-        setIncidents(mockIncidents);
+    // Fetch incidents from the API
+    const fetchIncidents = async () => {
+      if (!shiftId) {
         setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${INCIDENT_API_URL}/incidents/${shiftId}`,
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error fetching incidents: ${response.status}`);
+        }
+
+        const result = await response.json();
+        setIncidents(result.data || []);
       } catch (error) {
         console.error("Error fetching incidents:", error);
+      } finally {
         setLoading(false);
       }
     };
 
+    getWorkerInfo();
     fetchIncidents();
-  }, []);
+  }, [shiftId]);
 
-  const getSeverityClass = (severity) => {
+  const getReporterName = (userId) => {
+    return workerNames[userId] || `User #${userId}`;
+  };
+
+  const getSeverityClass = (severity: string) => {
     switch (severity) {
       case "low":
         return "bg-green-100 text-green-800";
@@ -84,7 +80,7 @@ const HazardsAndIncidents = () => {
     }
   };
 
-  const getStatusClass = (status) => {
+  const getStatusClass = (status: string) => {
     switch (status) {
       case "reported":
         return "bg-blue-100 text-blue-800";
@@ -103,7 +99,7 @@ const HazardsAndIncidents = () => {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString("en-US", {
       month: "short",
@@ -185,8 +181,11 @@ const HazardsAndIncidents = () => {
                     {incident.description.length > 60 ? "..." : ""}
                   </h4>
                   <p className="text-gray-500 text-sm mt-1">
-                    Reported by {incident.reportedByName} •{" "}
-                    {formatDate(incident.createdAt)}
+                    Reported by{" "}
+                    {getReporterName(
+                      incident.reportedByUserId || incident.reporttedByUserId,
+                    )}{" "}
+                    • {formatDate(incident.createdAt)}
                   </p>
                 </div>
                 <div className="flex">

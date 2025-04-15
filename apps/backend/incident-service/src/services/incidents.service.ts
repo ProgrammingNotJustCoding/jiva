@@ -62,3 +62,20 @@ export const getIncidentsByShiftId = async (
 
   return getIncidents;
 };
+
+export const updateIncidentData = async (
+  incidentId: number,
+  updateData: Partial<InsertIncident> & { updatedAt?: Date },
+) => {
+  try {
+    const [updatedIncident] = await db
+      .update(incidents)
+      .set(updateData)
+      .where(eq(incidents.id, incidentId))
+      .returning();
+
+    return updatedIncident;
+  } catch (e) {
+    throw new Error(`Failed to update incident: ${e}`);
+  }
+};

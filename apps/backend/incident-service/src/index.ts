@@ -5,6 +5,7 @@ import { incidentRouter, reportRouter, router } from "./api/routes/routes.ts";
 import { env } from "./config/env.ts";
 import logger from "./config/logger.ts";
 import { initializeBucket } from "./services/minio.service.ts";
+import { cors } from "hono/cors";
 
 const app = new Hono();
 
@@ -15,6 +16,7 @@ initializeBucket()
     process.exit(1);
   });
 
+app.use(cors());
 app.use(loggingMiddleware);
 
 app.route("/api", router);

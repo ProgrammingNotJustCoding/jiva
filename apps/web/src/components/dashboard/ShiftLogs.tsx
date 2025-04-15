@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaSearch,
   FaPlus,
@@ -11,6 +11,7 @@ import {
   FaTools,
   FaEllipsisH,
 } from "react-icons/fa";
+import { SHIFT_API_URL } from "@/utils/constants";
 
 type LogType =
   | "operation"
@@ -21,98 +22,62 @@ type LogType =
   | "environment"
   | "other";
 
+interface LogWorker {
+  firstName: string;
+  lastName: string;
+}
+
 interface ShiftLog {
   id: number;
-  timestamp: string;
-  type: LogType;
+  shiftId: number;
+  workerId: number;
+  category: LogType;
   details: string;
   relatedEquipment?: string;
   location: string;
-  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  isDeleted: boolean;
+  workerName: LogWorker;
+  workerDesignation: string;
 }
 
-const ShiftLogs = () => {
+interface ShiftLogsProps {
+  shiftId?: number;
+}
+
+const ShiftLogs: React.FC<ShiftLogsProps> = ({ shiftId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<LogType | "all">("all");
+  const [logs, setLogs] = useState<ShiftLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const logs: ShiftLog[] = [
-    {
-      id: 5001,
-      timestamp: "2023-10-15T07:15:00",
-      type: "operation",
-      details: "Started extraction in section B-7",
-      relatedEquipment: "Continuous Miner CM-103",
-      location: "Section B-7",
-      createdBy: "John Smith",
-    },
-    {
-      id: 5002,
-      timestamp: "2023-10-15T08:30:00",
-      type: "safety",
-      details: "Completed pre-shift safety checks",
-      location: "All sections",
-      createdBy: "Sarah Williams",
-    },
-    {
-      id: 5003,
-      timestamp: "2023-10-15T09:45:00",
-      type: "equipment",
-      details: "Maintenance check on conveyor system",
-      relatedEquipment: "Conveyor Belt CB-207",
-      location: "Transport Tunnel 3",
-      createdBy: "David Brown",
-    },
-    {
-      id: 5004,
-      timestamp: "2023-10-15T10:15:00",
-      type: "instruction",
-      details: "Team briefing on new ventilation procedures",
-      location: "Briefing Room",
-      createdBy: "John Smith",
-    },
-    {
-      id: 5005,
-      timestamp: "2023-10-15T11:30:00",
-      type: "personnel",
-      details: "Team rotation for lunch break initiated",
-      location: "All sections",
-      createdBy: "John Smith",
-    },
-    {
-      id: 5006,
-      timestamp: "2023-10-15T12:45:00",
-      type: "environment",
-      details: "Methane levels checked and within normal parameters",
-      location: "Sections B-5 through B-9",
-      createdBy: "Emma Davis",
-    },
-    {
-      id: 5007,
-      timestamp: "2023-10-15T13:20:00",
-      type: "equipment",
-      details: "Minor repair to hydraulic system",
-      relatedEquipment: "Roof Bolter RB-42",
-      location: "Section B-8",
-      createdBy: "Robert Wilson",
-    },
-    {
-      id: 5008,
-      timestamp: "2023-10-15T14:10:00",
-      type: "operation",
-      details: "Completed planned extraction target for section B-7",
-      relatedEquipment: "Continuous Miner CM-103",
-      location: "Section B-7",
-      createdBy: "Michael Miller",
-    },
-    {
-      id: 5009,
-      timestamp: "2023-10-15T15:30:00",
-      type: "other",
-      details: "External inspector arrival, escorted to office",
-      location: "Mine Entrance",
-      createdBy: "Jennifer Taylor",
-    },
-  ];
+  useEffect(() => {
+    const fetchLogs = async () => {
+      if (!shiftId) return;
+
+      try {
+        setLoading(true);
+        const response = await fetch(`${SHIFT_API_URL}/logs/${shiftId}`);
+
+        if (!response.ok) {
+          throw new Error(`Error fetching logs: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        setLogs(responseData.data || []);
+      } catch (err) {
+        console.error("Failed to fetch logs:", err);
+        setError(String(err));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLogs();
+  }, [shiftId]);
 
   const filteredLogs = logs.filter((log) => {
     const matchesSearch =
@@ -121,7 +86,7 @@ const ShiftLogs = () => {
       (log.relatedEquipment &&
         log.relatedEquipment.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesType = filterType === "all" || log.type === filterType;
+    const matchesType = filterType === "all" || log.category === filterType;
 
     return matchesSearch && matchesType;
   });
@@ -205,6 +170,28 @@ const ShiftLogs = () => {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="p-6 text-center">
+        <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="mt-3 text-gray-600">Loading shift logs...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <h3 className="text-xl font-medium text-red-700 mb-2">
+            Error Loading Logs
+          </h3>
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -249,66 +236,71 @@ const ShiftLogs = () => {
       </div>
 
       <div className="space-y-4">
-        {filteredLogs.map((log) => (
-          <div key={log.id} className="bg-gray-50 rounded-lg p-4 shadow-sm">
-            <div className="flex items-start">
-              <div className="p-3 rounded-full bg-white shadow-sm mr-4">
-                {getTypeIcon(log.type)}
-              </div>
-
-              <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                  <div className="flex items-center mb-2 md:mb-0">
-                    <div className="text-sm font-medium text-gray-900 mr-3">
-                      {formatTimestamp(log.timestamp)}
-                    </div>
-                    {getTypeBadge(log.type)}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Created by: {log.createdBy}
-                  </div>
+        {filteredLogs.length > 0 ? (
+          filteredLogs.map((log) => (
+            <div key={log.id} className="bg-gray-50 rounded-lg p-4 shadow-sm">
+              <div className="flex items-start">
+                <div className="p-3 rounded-full bg-white shadow-sm mr-4">
+                  {getTypeIcon(log.category)}
                 </div>
 
-                <p className="text-gray-800 mb-2">{log.details}</p>
-
-                <div className="flex flex-col sm:flex-row sm:items-center text-sm text-gray-600 space-y-1 sm:space-y-0 sm:space-x-6">
-                  <div className="flex items-center">
-                    <span className="font-medium mr-1">Location:</span>{" "}
-                    {log.location}
+                <div className="flex-1">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
+                    <div className="flex items-center mb-2 md:mb-0">
+                      <div className="text-sm font-medium text-gray-900 mr-3">
+                        {formatTimestamp(log.createdAt)}
+                      </div>
+                      {getTypeBadge(log.category)}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Created by: {log.workerName.firstName}{" "}
+                      {log.workerName.lastName}
+                    </div>
                   </div>
-                  {log.relatedEquipment && (
+
+                  <p className="text-gray-800 mb-2">{log.details}</p>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center text-sm text-gray-600 space-y-1 sm:space-y-0 sm:space-x-6">
                     <div className="flex items-center">
-                      <span className="font-medium mr-1">Equipment:</span>{" "}
-                      {log.relatedEquipment}
+                      <span className="font-medium mr-1">Location:</span>{" "}
+                      {log.location}
                     </div>
-                  )}
+                    {log.relatedEquipment && (
+                      <div className="flex items-center">
+                        <span className="font-medium mr-1">Equipment:</span>{" "}
+                        {log.relatedEquipment}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="ml-4">
-                <button className="text-gray-400 hover:text-gray-600">
-                  <FaEllipsisH />
-                </button>
+                <div className="ml-4">
+                  <button className="text-gray-400 hover:text-gray-600">
+                    <FaEllipsisH />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-
-        {filteredLogs.length === 0 && (
+          ))
+        ) : (
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <FaExclamationTriangle className="mx-auto text-gray-400 text-3xl mb-3" />
             <p className="text-gray-500">
-              No logs found matching your search criteria.
+              {searchTerm || filterType !== "all"
+                ? "No logs found matching your search criteria."
+                : "No logs have been recorded for this shift yet."}
             </p>
-            <button
-              className="mt-4 text-cyan-600 hover:text-cyan-800"
-              onClick={() => {
-                setSearchTerm("");
-                setFilterType("all");
-              }}
-            >
-              Clear filters
-            </button>
+            {(searchTerm || filterType !== "all") && (
+              <button
+                className="mt-4 text-cyan-600 hover:text-cyan-800"
+                onClick={() => {
+                  setSearchTerm("");
+                  setFilterType("all");
+                }}
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         )}
       </div>

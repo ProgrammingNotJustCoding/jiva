@@ -30,10 +30,13 @@ export const postWorkplan = async (c: Context) => {
   const parsedBody = bodySchema.safeParse(body);
 
   if (!parsedBody.success) {
-    return c.json({
-      error: errors[400],
-      details: parsedBody.error.issues,
-    });
+    return c.json(
+      {
+        error: errors[400],
+        details: parsedBody.error.issues,
+      },
+      400,
+    );
   }
 
   const workplanData = {
