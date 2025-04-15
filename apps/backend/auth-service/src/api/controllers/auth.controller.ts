@@ -145,6 +145,7 @@ export const signIn = async (c: Context) => {
     {
       data: {
         token,
+        role: user.role,
       },
     },
     200,
