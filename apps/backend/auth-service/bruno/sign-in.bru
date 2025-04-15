@@ -6,6 +6,13 @@ meta {
 
 post {
   url: {{BaseUrl}}/auth/signin
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "userCode": "HP586092",
+    "password": "password"
+  }
 }

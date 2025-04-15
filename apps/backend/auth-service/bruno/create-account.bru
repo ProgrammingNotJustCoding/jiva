@@ -6,6 +6,15 @@ meta {
 
 post {
   url: {{BaseUrl}}/auth/create
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "firstName": "Harsh",
+    "lastName": "Patel",
+    "role": "supervisor",
+    "phoneNumber": "1234567890"
+  }
 }

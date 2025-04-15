@@ -1,0 +1,15 @@
+meta {
+  name: verify-auth
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{BaseUrl}}/auth/verify
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Iiwicm9sZSI6InN1cGVydmlzb3IiLCJpYXQiOjE3NDQ3MzA5NDEsImV4cCI6MTc0NDgxNzM0MX0.DJ-f6TIuQ7IBfnj-_hRTB_V61l9KGMZNtR1au2-dNLc
+}

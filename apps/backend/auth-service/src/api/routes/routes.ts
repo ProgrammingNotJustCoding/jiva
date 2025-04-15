@@ -1,14 +1,18 @@
 import { Hono } from "hono";
-import { createAccount, signIn, signOut } from "../controllers/auth.controller.ts";
+import {
+  createAccount,
+  signIn,
+  verifyAuth,
+} from "../controllers/auth.controller.ts";
 
-const router = new Hono()
+const router = new Hono();
 
-router.get("/health", async(c) => {
-    return c.text("OK");
-})
+router.get("/health", async (c) => {
+  return c.text("OK");
+});
 
 router.post("/auth/signin", signIn);
 router.post("/auth/create", createAccount);
-router.post("/auth/signout", signOut);
+router.get("/auth/verify", verifyAuth);
 
-export default router
+export default router;
