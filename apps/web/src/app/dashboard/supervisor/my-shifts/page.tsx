@@ -9,6 +9,7 @@ import {
   FaClock,
   FaExclamationCircle,
 } from "react-icons/fa";
+import { SHIFT_API_URL } from "@/utils/constants";
 
 interface Shift {
   id: number;
@@ -29,14 +30,14 @@ const MyShiftsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const userId = 1;
-
   useEffect(() => {
     const fetchShifts = async () => {
+      const getUserData = localStorage.getItem("user-data");
+      const userId = getUserData ? JSON.parse(getUserData).id : null;
       try {
         setLoading(true);
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/shifts?supervisorId=${userId}`,
+          `${SHIFT_API_URL}/shifts?supervisorId=${userId}`,
         );
 
         if (!response.ok) {
@@ -54,7 +55,7 @@ const MyShiftsPage = () => {
     };
 
     fetchShifts();
-  }, [userId]);
+  }, []);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();

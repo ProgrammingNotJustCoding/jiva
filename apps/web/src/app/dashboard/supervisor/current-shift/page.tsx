@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { SHIFT_API_URL } from "@/utils/constants";
 import {
   FaUsers,
   FaClipboardList,
@@ -14,39 +15,131 @@ import ShiftHandoverButton from "@/components/dashboard/ShiftHandoverButton";
 
 const CurrentShiftPage = () => {
   const [activeTab, setActiveTab] = useState("workers");
+  const [shiftData, setShiftData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const shiftInfo = {
-    id: "8",
-    start: "2023-10-15T07:00:00",
-    end: "2023-10-15T19:00:00",
-    location: "Mine Section B - East Wing",
-    supervisor: "John Smith",
-    status: "ongoing",
-    nextSupervisor: "Sarah Johnson",
-  };
+  useEffect(() => {
+    const fetchCurrentShift = async () => {
+      try {
+        const getUserData = localStorage.getItem("user-data");
+        const userId = getUserData ? JSON.parse(getUserData).id : null;
+
+        if (!userId) {
+          throw new Error("User ID not found");
+        }
+
+        const response = await fetch(
+          `${SHIFT_API_URL}/shifts/current-shift/${userId}`,
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error fetching shift data: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setShiftData(data.data);
+      } catch (err) {
+        console.error("Failed to fetch shift data:", err);
+        setError(String(err));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCurrentShift();
+  }, []);
 
   const formatTime = (dateString: string) => {
+    if (!dateString) return "Not set";
     return new Date(dateString).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Not set";
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const getShiftStatus = (status: string) => {
+    switch (status) {
+      case "to_begin":
+        return { label: "To Begin", className: "bg-blue-100 text-blue-800" };
+      case "ongoing":
+        return { label: "Active", className: "bg-green-100 text-green-800" };
+      case "completed":
+        return { label: "Completed", className: "bg-gray-100 text-gray-800" };
+      default:
+        return { label: status, className: "bg-gray-100 text-gray-800" };
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "workers":
-        return <ShiftWorkers />;
+        return <ShiftWorkers workers={shiftData?.workers || []} />;
       case "logs":
         return <ShiftLogs />;
       case "hazards":
         return <HazardsAndIncidents />;
       default:
-        return <ShiftWorkers />;
+        return <ShiftWorkers workers={shiftData?.workers || []} />;
     }
   };
 
+  if (loading) {
+    return (
+      <DashboardLayout userRole="supervisor">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="mt-3 text-gray-600">Loading shift data...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout userRole="supervisor">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <h3 className="text-xl font-medium text-red-700 mb-2">
+            Error Loading Shift Data
+          </h3>
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!shiftData) {
+    return (
+      <DashboardLayout userRole="supervisor">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+          <h3 className="text-xl font-medium text-amber-700 mb-2">
+            No Active Shift
+          </h3>
+          <p className="text-amber-600">
+            You don&apos;t have any active shift at the moment.
+          </p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const statusInfo = getShiftStatus(shiftData.status);
+
   return (
-    <DashboardLayout userRole="supervisor" userName="John Smith">
+    <DashboardLayout userRole="supervisor">
       <div className="relative overflow-hidden">
         <div className="space-y-6 relative z-10">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 mb-6">
@@ -56,29 +149,48 @@ const CurrentShiftPage = () => {
                   <h2 className="text-2xl font-bold text-gray-800 mr-3">
                     Current Shift
                   </h2>
-                  <span className="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
-                    Active
+                  <span
+                    className={`px-3 py-1 text-sm font-medium rounded-full ${statusInfo.className}`}
+                  >
+                    {statusInfo.label}
                   </span>
                 </div>
-                <p className="text-gray-600 mt-1">{shiftInfo.id}</p>
+                <p className="text-gray-600 mt-1">Shift #{shiftData.id}</p>
               </div>
 
               <div className="mt-4 md:mt-0 flex flex-col md:flex-row items-start md:items-center">
                 <div className="flex flex-col mr-6">
                   <div className="flex items-center text-gray-700">
-                    <span className="font-medium mr-2">Time:</span>
+                    <span className="font-medium mr-2">Supervisor:</span>
                     <span>
-                      {formatTime(shiftInfo.start)} -{" "}
-                      {formatTime(shiftInfo.end)}
+                      {shiftData.supervisor.firstName}{" "}
+                      {shiftData.supervisor.lastName}
                     </span>
                   </div>
                   <div className="flex items-center text-gray-700 mt-1">
-                    <span className="font-medium mr-2">Location:</span>
-                    <span>{shiftInfo.location}</span>
+                    <span className="font-medium mr-2">Date:</span>
+                    <span>{formatDate(shiftData.startTime)}</span>
+                  </div>
+                  <div className="flex items-center text-gray-700 mt-1">
+                    <span className="font-medium mr-2">Time:</span>
+                    <span>
+                      {formatTime(shiftData.startTime)}
+                      {shiftData.endTime
+                        ? ` - ${formatTime(shiftData.endTime)}`
+                        : " - Ongoing"}
+                    </span>
                   </div>
                 </div>
 
-                <ShiftHandoverButton shiftInfo={shiftInfo} />
+                <ShiftHandoverButton
+                  shiftInfo={{
+                    id: shiftData.id,
+                    status: shiftData.status,
+                    nextSupervisor: shiftData.nextSupervisor
+                      ? `${shiftData.nextSupervisor.firstName} ${shiftData.nextSupervisor.lastName}`
+                      : null,
+                  }}
+                />
               </div>
             </div>
           </div>

@@ -2,14 +2,12 @@ import {
   boolean,
   integer,
   pgTable,
-  serial,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
 
 export const userDetails = pgTable("user_details", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().unique(),
+  userId: integer("user_id").primaryKey(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phoneNumber: text("phone_number").notNull(),

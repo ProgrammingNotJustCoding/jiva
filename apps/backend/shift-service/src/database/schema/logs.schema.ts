@@ -27,7 +27,7 @@ export const shiftLogs = pgTable("shift_logs", {
     .references(() => shifts.id),
   workerId: integer("worker_id")
     .notNull()
-    .references(() => userDetails.id),
+    .references(() => userDetails.userId),
   category: categoryEnum("category").notNull(),
   details: text("details").notNull(),
   relatedEquipment: text("related_equipment"),

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { AUTH_API_URL } from "@/utils/constants";
 
 interface UserFormProps {
   userType: "supervisor" | "worker";
@@ -35,13 +36,33 @@ const UserForm: React.FC<UserFormProps> = ({ userType, onSubmit }) => {
         role: userType,
       };
 
+      // Make the API request to AUTH_API_URL/auth/create
+      const response = await fetch(`${AUTH_API_URL}/auth/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create user");
+      }
+
+      // Call the onSubmit prop with the form data
       await onSubmit(formData);
 
       setFirstName("");
       setLastName("");
+      setPhoneNumber("");
       setSuccess(true);
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
       console.error(err);
     } finally {
       setLoading(false);

@@ -12,10 +12,10 @@ export const shiftWorkers = pgTable("shift_workers", {
   id: serial("id").primaryKey(),
   supervisorId: integer("supervisor_id")
     .notNull()
-    .references(() => userDetails.id),
+    .references(() => userDetails.userId),
   workerId: integer("worker_id")
     .notNull()
-    .references(() => userDetails.id),
+    .references(() => userDetails.userId),
   shiftId: integer("shift_id")
     .notNull()
     .references(() => shifts.id),

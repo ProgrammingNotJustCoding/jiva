@@ -90,6 +90,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // Use props if provided, otherwise use data from API
   const userRole = propUserRole || user?.role || "worker";
   const userName = propUserName || user?.name || "User";
+  const userCode = user?.userCode || "";
 
   // Map roles from API to component props if needed
   const mappedRole = userRole === "worker" ? "supervisor" : userRole;
@@ -247,13 +248,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </nav>
 
         <div className="absolute bottom-0 left-0 w-full border-t border-neutral-100">
-          {(mappedRole === "supervisor" || mappedRole === "manager") && (
+          {(mappedRole === "supervisor" ||
+            mappedRole === "manager" ||
+            mappedRole === "admin") && (
             <div className="p-4 flex items-center">
               <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 mr-3">
                 <FaUser />
               </div>
               <div className="flex-1">
                 <div className="text-sm font-medium">{userName}</div>
+                <div className="text-xs text-neutral-500">{userCode}</div>
                 <button className="text-xs text-cyan-600 flex items-center mt-1 hover:underline">
                   <FaKey className="mr-1 text-xs" />
                   Change Password

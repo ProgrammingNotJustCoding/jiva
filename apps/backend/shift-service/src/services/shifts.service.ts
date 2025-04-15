@@ -6,6 +6,7 @@ import {
   getWorkersByShiftId,
   insertShiftWorker,
 } from "./shiftWorker.service.ts";
+import { userDetails } from "../database/schema/details.schema.ts";
 
 export const insertShift = async (tx: any, shift: InsertShift) => {
   const [newShift] = await tx.insert(shifts).values(shift).returning();
@@ -61,22 +62,61 @@ export const getShiftsBySupervisor = async (
 };
 
 export const getCurrentShiftBySupervisor = async (supervisorId: number) => {
-  const [getCurrentShift] = await db
-    .select()
+  const [currentShift] = await db
+    .select({
+      id: shifts.id,
+      supervisorId: shifts.supervisorId,
+      nextSupervisorId: shifts.nextSupervisorId,
+      startTime: shifts.startTime,
+      endTime: shifts.endTime,
+      status: shifts.status,
+      finalizedAt: shifts.finalizedAt,
+      acknowledgedAt: shifts.acknowledgedAt,
+      supervisorFirstName: userDetails.firstName,
+      supervisorLastName: userDetails.lastName,
+      supervisorPhoneNumber: userDetails.phoneNumber,
+      supervisorDesignation: userDetails.designation,
+    })
     .from(shifts)
+    .leftJoin(userDetails, eq(shifts.supervisorId, userDetails.userId))
     .where(eq(shifts.supervisorId, supervisorId))
     .limit(1)
     .orderBy(desc(shifts.createdAt));
 
-  const getWorkers = await getWorkersByShiftId(getCurrentShift.id);
+  let nextSupervisorDetails = null;
+  if (currentShift && currentShift.nextSupervisorId) {
+    [nextSupervisorDetails] = await db
+      .select({
+        id: userDetails.userId,
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
+        phoneNumber: userDetails.phoneNumber,
+        designation: userDetails.designation,
+      })
+      .from(userDetails)
+      .where(eq(userDetails.userId, currentShift.nextSupervisorId));
+  }
+
+  const workers = await getWorkersByShiftId(currentShift.id);
 
   return {
-    ...getCurrentShift,
-    createdAt: undefined,
-    updatedAt: undefined,
-    deletedAt: undefined,
-    isDeleted: undefined,
-    workers: getWorkers,
+    id: currentShift.id,
+    supervisorId: currentShift.supervisorId,
+    supervisor: {
+      id: currentShift.supervisorId,
+      firstName: currentShift.supervisorFirstName,
+      lastName: currentShift.supervisorLastName,
+      phoneNumber: currentShift.supervisorPhoneNumber,
+      designation: currentShift.supervisorDesignation,
+    },
+    nextSupervisorId: currentShift.nextSupervisorId,
+    nextSupervisor: nextSupervisorDetails,
+    startTime: currentShift.startTime,
+    endTime: currentShift.endTime,
+    status: currentShift.status,
+    finalizedAt: currentShift.finalizedAt,
+    acknowledgedAt: currentShift.acknowledgedAt,
+    workers: workers,
   };
 };
 

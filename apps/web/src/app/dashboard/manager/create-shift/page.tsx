@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { FaCalendarAlt, FaUserTie, FaHardHat, FaCheck } from "react-icons/fa";
 import { toast } from "react-hot-toast";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+import { SHIFT_API_URL } from "@/utils/constants";
 
 interface User {
   id: number;
@@ -28,7 +27,7 @@ const CreateShift = () => {
     const fetchSupervisors = async () => {
       try {
         const response = await fetch(
-          `${API_URL}/details/designation?d=supervisor`,
+          `${SHIFT_API_URL}/details/designation?d=supervisor`,
         );
         if (!response.ok) throw new Error("Failed to fetch supervisors");
         const data = await response.json();
@@ -45,7 +44,9 @@ const CreateShift = () => {
   useEffect(() => {
     const fetchWorkers = async () => {
       try {
-        const response = await fetch(`${API_URL}/details/designation?d=worker`);
+        const response = await fetch(
+          `${SHIFT_API_URL}/details/designation?d=worker`,
+        );
         if (!response.ok) throw new Error("Failed to fetch workers");
         const data = await response.json();
         setWorkers(data.data || []);
@@ -81,7 +82,7 @@ const CreateShift = () => {
         })),
       };
 
-      const response = await fetch(`${API_URL}/shifts`, {
+      const response = await fetch(`${SHIFT_API_URL}/shifts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

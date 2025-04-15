@@ -20,9 +20,9 @@ export const shifts = pgTable("shifts", {
   id: serial("id").primaryKey(),
   supervisorId: integer("supervisor_id")
     .notNull()
-    .references(() => userDetails.id),
+    .references(() => userDetails.userId),
   nextSupervisorId: integer("next_supervisor_id").references(
-    () => userDetails.id,
+    () => userDetails.userId,
   ),
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time"),

@@ -24,7 +24,7 @@ const SupervisorDashboard = () => {
   };
 
   return (
-    <DashboardLayout userRole="supervisor" userName="John Smith">
+    <DashboardLayout userRole="supervisor">
       <div className="relative overflow-hidden">
         <div
           className="absolute top-0 right-0 w-1/2 h-full z-0 opacity-20"

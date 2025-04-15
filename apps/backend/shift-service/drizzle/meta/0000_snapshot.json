@@ -1,5 +1,5 @@
 {
-  "id": "67c35122-ffd1-41b4-8d56-dc87e22451f7",
+  "id": "1e8a779f-ce9d-464e-b4b9-7d633f4974b7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,16 +8,10 @@
       "name": "user_details",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "user_id": {
           "name": "user_id",
           "type": "integer",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true
         },
         "first_name": {
@@ -75,15 +69,7 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "user_details_user_id_unique": {
-          "name": "user_details_user_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -178,15 +164,15 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "shift_logs_worker_id_user_details_id_fk": {
-          "name": "shift_logs_worker_id_user_details_id_fk",
+        "shift_logs_worker_id_user_details_user_id_fk": {
+          "name": "shift_logs_worker_id_user_details_user_id_fk",
           "tableFrom": "shift_logs",
           "tableTo": "user_details",
           "columnsFrom": [
             "worker_id"
           ],
           "columnsTo": [
-            "id"
+            "user_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -256,28 +242,28 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "shift_workers_supervisor_id_user_details_id_fk": {
-          "name": "shift_workers_supervisor_id_user_details_id_fk",
+        "shift_workers_supervisor_id_user_details_user_id_fk": {
+          "name": "shift_workers_supervisor_id_user_details_user_id_fk",
           "tableFrom": "shift_workers",
           "tableTo": "user_details",
           "columnsFrom": [
             "supervisor_id"
           ],
           "columnsTo": [
-            "id"
+            "user_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "shift_workers_worker_id_user_details_id_fk": {
-          "name": "shift_workers_worker_id_user_details_id_fk",
+        "shift_workers_worker_id_user_details_user_id_fk": {
+          "name": "shift_workers_worker_id_user_details_user_id_fk",
           "tableFrom": "shift_workers",
           "tableTo": "user_details",
           "columnsFrom": [
             "worker_id"
           ],
           "columnsTo": [
-            "id"
+            "user_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -385,28 +371,28 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "shifts_supervisor_id_user_details_id_fk": {
-          "name": "shifts_supervisor_id_user_details_id_fk",
+        "shifts_supervisor_id_user_details_user_id_fk": {
+          "name": "shifts_supervisor_id_user_details_user_id_fk",
           "tableFrom": "shifts",
           "tableTo": "user_details",
           "columnsFrom": [
             "supervisor_id"
           ],
           "columnsTo": [
-            "id"
+            "user_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "shifts_next_supervisor_id_user_details_id_fk": {
-          "name": "shifts_next_supervisor_id_user_details_id_fk",
+        "shifts_next_supervisor_id_user_details_user_id_fk": {
+          "name": "shifts_next_supervisor_id_user_details_user_id_fk",
           "tableFrom": "shifts",
           "tableTo": "user_details",
           "columnsFrom": [
             "next_supervisor_id"
           ],
           "columnsTo": [
-            "id"
+            "user_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"

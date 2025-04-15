@@ -79,10 +79,13 @@ export const createAccount = async (c: Context) => {
       role,
     );
   } catch (e) {
-    return c.json({
-      error: errors[500],
-      details: `Error submitting user details to Shift Service: ${e}`,
-    });
+    return c.json(
+      {
+        error: errors[500],
+        details: `Error submitting user details to Shift Service: ${e}`,
+      },
+      500,
+    );
   }
 
   return c.text("OK", 201);

@@ -20,7 +20,7 @@ export const getUserDetailsById = async (userId: number) => {
   const [fetchUserDetails] = await db
     .select()
     .from(userDetails)
-    .where(eq(userDetails.id, userId));
+    .where(eq(userDetails.userId, userId));
 
   if (!fetchUserDetails) {
     throw new Error("Failed to fetch user details");
@@ -38,7 +38,7 @@ export const getUserDetailsById = async (userId: number) => {
 export const getUsersDetailsByDesignation = async (designation: string) => {
   const fetchUserDetails = await db
     .select({
-      id: userDetails.id,
+      id: userDetails.userId,
       firstName: userDetails.firstName,
       lastName: userDetails.lastName,
     })
@@ -60,7 +60,7 @@ export const updateUserDetails = async (
   const [updatedUserDetails] = await db
     .update(userDetails)
     .set(userDetailsData)
-    .where(eq(userDetails.id, userId))
+    .where(eq(userDetails.userId, userId))
     .returning();
 
   if (!updatedUserDetails) {
@@ -74,7 +74,7 @@ export const softDeleteUserDetails = async (userId: number) => {
   const [deletedUserDetails] = await db
     .update(userDetails)
     .set({ deletedAt: new Date(), isDeleted: true })
-    .where(eq(userDetails.id, userId))
+    .where(eq(userDetails.userId, userId))
     .returning();
 
   if (!deletedUserDetails) {
@@ -87,7 +87,7 @@ export const softDeleteUserDetails = async (userId: number) => {
 export const hardDeleteUserDetails = async (userId: number) => {
   const [deletedUserDetails] = await db
     .delete(userDetails)
-    .where(eq(userDetails.id, userId))
+    .where(eq(userDetails.userId, userId))
     .returning();
 
   if (!deletedUserDetails) {

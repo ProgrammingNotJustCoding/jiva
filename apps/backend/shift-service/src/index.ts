@@ -10,9 +10,11 @@ import {
   router,
   shiftRouter,
 } from "./api/routes/routes.ts";
+import { cors } from "hono/cors";
 
 const app = new Hono();
 
+app.use(cors());
 app.use(loggingMiddleware);
 
 app.route("/api", router);

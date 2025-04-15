@@ -31,7 +31,7 @@ export const shiftRouter = new Hono();
 
 shiftRouter.post("/", postShift);
 shiftRouter.get("/", getSupervisorShifts);
-shiftRouter.get("/:id", getOngoingShift);
+shiftRouter.get("/current-shift/:id", getOngoingShift);
 shiftRouter.put("/:id", putShift);
 shiftRouter.delete("/:id", deleteShift);
 
