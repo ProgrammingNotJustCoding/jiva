@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
+    "axios": "^1.8.4",
     "dotenv": "^16.5.0",
     "drizzle-kit": "^0.30.6",
     "drizzle-orm": "^0.41.0",

@@ -18,6 +18,12 @@ export const generateReportController = async (c: Context) => {
     return c.body(buffer);
   } catch (error) {
     console.error("Error generating report:", error);
-    return c.json({ error: "Failed to generate report" }, 500);
+    return c.json(
+      {
+        error: "Failed to generate report",
+        details: `Error generating report: ${error}`,
+      },
+      500,
+    );
   }
 };

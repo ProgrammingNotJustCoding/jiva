@@ -1,5 +1,6 @@
 "use client";
 
+import { INCIDENT_API_URL, SHIFT_API_URL } from "@/utils/constants";
 import React, { useState } from "react";
 import {
   FaExchangeAlt,
@@ -7,6 +8,7 @@ import {
   FaCheckCircle,
   FaTimes,
   FaUsers,
+  FaDownload,
 } from "react-icons/fa";
 
 interface ShiftInfo {
@@ -49,9 +51,11 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
       status: "in_progress",
     },
   ]);
-  const [handoverStep, setHandoverStep] = useState("review"); 
+  const [handoverStep, setHandoverStep] = useState("review");
   const [reportGenerated, setReportGenerated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [reportUrl, setReportUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString([], {
@@ -79,13 +83,38 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
 
   const handleGenerateReport = async () => {
     setIsLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    setError(null);
 
+    try {
+      const shiftId = localStorage.getItem("shiftId");
+
+      if (!shiftId) {
+        throw new Error("Shift ID not found in localStorage");
+      }
+
+      const response = await fetch(`${INCIDENT_API_URL}/reports/${shiftId}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/pdf",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate report");
+      }
+
+      const blob = await response.blob();
+
+      const url = URL.createObjectURL(blob);
+      setReportUrl(url);
       setReportGenerated(true);
       setHandoverStep("report");
     } catch (error) {
       console.error("Error generating shift report:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to generate report",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -94,16 +123,50 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
   const handleFinalizeHandover = async () => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const shiftId = localStorage.getItem("shiftId");
+
+      if (!shiftId) {
+        throw new Error("Shift ID not found in localStorage");
+      }
+
+      const response = await fetch(`${SHIFT_API_URL}/shifts/${shiftId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "handed_over" }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to finalize handover");
+      }
 
       setHandoverStep("finalize");
       setTimeout(() => {
         setShowHandoverModal(false);
+        if (reportUrl) {
+          URL.revokeObjectURL(reportUrl);
+        }
       }, 2000);
     } catch (error) {
       console.error("Error finalizing handover:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to finalize handover",
+      );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDownloadReport = () => {
+    if (reportUrl) {
+      const link = document.createElement("a");
+      link.href = reportUrl;
+      link.download = `shift-report-${shiftInfo.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -117,11 +180,9 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
         Shift Handover
       </button>
 
-      {/* Shift Handover Modal - with backdrop filter for transparency */}
       {showHandoverModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto relative">
-            {/* Modal Header */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex justify-between items-center">
                 <h3 className="text-xl font-bold text-gray-800">
@@ -137,7 +198,6 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
               </div>
             </div>
 
-            {/* Modal Content */}
             <div className="p-6">
               {handoverStep === "review" && (
                 <>
@@ -192,6 +252,12 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
                       ))}
                     </div>
                   </div>
+
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md mb-4">
+                      {error}
+                    </div>
+                  )}
 
                   <div className="flex justify-end">
                     <button
@@ -276,6 +342,18 @@ const ShiftHandoverButton: React.FC<ShiftHandoverButtonProps> = ({
                         </div>
                       </div>
                     </div>
+
+                    {reportUrl && (
+                      <div className="mt-4">
+                        <button
+                          onClick={handleDownloadReport}
+                          className="w-full py-2 bg-cyan-50 text-cyan-700 border border-cyan-200 font-medium rounded-md hover:bg-cyan-100 transition-colors flex items-center justify-center"
+                        >
+                          <FaDownload className="mr-2" />
+                          Download Report
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end">

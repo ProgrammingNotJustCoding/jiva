@@ -8,7 +8,7 @@ const Footer = () => {
     <footer className="bg-white border-t border-gray-100">
       <div className="container mx-auto py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo and description */}
+
           <div className="col-span-1 md:col-span-1">
             <h2 className="text-2xl font-bold text-cyan-500">Jiva</h2>
             <p className="mt-4 text-gray-600">
@@ -31,7 +31,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick links */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Product
@@ -60,7 +59,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Company */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Company
@@ -89,7 +87,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Contact

@@ -37,14 +37,16 @@ const CurrentShiftPage = () => {
           throw new Error(`Error fetching shift data: ${response.status}`);
         }
 
-        const data = await response.json();
-        setShiftData(data.data);
+        const resData = await response.json();
+        setShiftData(resData.data);
 
-        if (data.data?.workers?.length) {
+        if (resData.data?.workers?.length) {
           localStorage.setItem(
             "shift-workers",
-            JSON.stringify(data.data.workers),
+            JSON.stringify(resData.data.workers),
           );
+
+          localStorage.setItem("shiftId", resData.data.id);
         }
       } catch (err) {
         console.error("Failed to fetch shift data:", err);

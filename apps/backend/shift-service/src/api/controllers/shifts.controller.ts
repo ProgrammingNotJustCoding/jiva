@@ -6,6 +6,7 @@ import logger from "../../config/logger.ts";
 import {
   getCurrentShiftBySupervisor,
   getCurrentShiftByWorker,
+  getShiftByShiftId,
   getShiftsBySupervisor,
   insertShiftData,
   softDeleteShift,
@@ -113,6 +114,38 @@ export const getSupervisorShifts = async (c: Context) => {
     );
   }
 };
+
+export const getShift = async (c: Context) => {
+  const shiftId = c.req.param("id");
+  if (!shiftId) {
+    return c.json(
+      {
+        error: errors[400],
+        details: "shiftId is required",
+      },
+      400,
+    );
+  }
+
+  try {
+    const shift = await getShiftByShiftId(Number(shiftId));
+    return c.json(
+      {
+        data: shift,
+      },
+      200,
+    );
+  } catch (e) {
+    logger.error("Error fetching shift", e);
+    return c.json(
+      {
+        error: errors[500],
+        details: `Error fetching shift: ${e}`,
+      },
+      500,
+    );
+  }
+}
 
 export const getWorkerShift = async (c: Context) => {
   const workerId = c.req.param("id");

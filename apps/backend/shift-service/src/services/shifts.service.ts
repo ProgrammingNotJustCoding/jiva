@@ -120,6 +120,53 @@ export const getCurrentShiftBySupervisor = async (supervisorId: number) => {
     workers: workers,
   };
 };
+
+export const getShiftByShiftId = async (shiftId: number) => {
+  const [shift] = await db
+    .select({
+      id: shifts.id,
+      supervisorId: shifts.supervisorId,
+      nextSupervisorId: shifts.nextSupervisorId,
+      startTime: shifts.startTime,
+      endTime: shifts.endTime,
+      status: shifts.status,
+      finalizedAt: shifts.finalizedAt,
+      acknowledgedAt: shifts.acknowledgedAt,
+      supervisorFirstName: userDetails.firstName,
+      supervisorLastName: userDetails.lastName,
+      supervisorPhoneNumber: userDetails.phoneNumber,
+      supervisorDesignation: userDetails.designation,
+    })
+    .from(shifts)
+    .leftJoin(userDetails, eq(shifts.supervisorId, userDetails.userId))
+    .where(eq(shifts.id, shiftId));
+
+  if (!shift) {
+    return null;
+  }
+
+  const workers = await getWorkersByShiftId(shift.id);
+
+  return {
+    id: shift.id,
+    supervisorId: shift.supervisorId,
+    supervisor: {
+      id: shift.supervisorId,
+      firstName: shift.supervisorFirstName,
+      lastName: shift.supervisorLastName,
+      phoneNumber: shift.supervisorPhoneNumber,
+      designation: shift.supervisorDesignation,
+    },
+    nextSupervisorId: shift.nextSupervisorId,
+    startTime: shift.startTime,
+    endTime: shift.endTime,
+    status: shift.status,
+    finalizedAt: shift.finalizedAt,
+    acknowledgedAt: shift.acknowledgedAt,
+    workers: workers,
+  };
+}
+
 export const getCurrentShiftByWorker = async (workerId: number) => {
   const [latestShiftWorker] = await db
     .select({

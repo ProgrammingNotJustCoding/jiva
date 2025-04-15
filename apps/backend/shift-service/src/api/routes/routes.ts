@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import {
   deleteShift,
   getOngoingShift,
+  getShift,
   getSupervisorShifts,
   getWorkerShift,
   postShift,
@@ -34,6 +35,7 @@ shiftRouter.post("/", postShift);
 shiftRouter.get("/", getSupervisorShifts);
 shiftRouter.get("/current-shift/worker/:id", getWorkerShift);
 shiftRouter.get("/current-shift/:id", getOngoingShift);
+shiftRouter.get("/:id", getShift);
 shiftRouter.put("/:id", putShift);
 shiftRouter.delete("/:id", deleteShift);
 
