@@ -4,6 +4,9 @@
 
 Jiva simplifies daily tasks and enhances safety compliance for everyone working in coal mines. Move away from paper logs and complex tracking spreadsheets with an easy-to-use digital solution designed specifically for the mining environment.
 
+> [!CAUTION]
+> We are currently developing the Jiva platform.
+
 1. **Effortless Shift Logging & Handovers:**
 
     - Quickly record shift activities, production numbers, and equipment status.
@@ -27,6 +30,11 @@ Jiva simplifies daily tasks and enhances safety compliance for everyone working 
     - Quickly see progress and identify potential delays.
 
 **Jiva helps ensure that safety procedures are followed, communication is clear, and operations run smoothly, contributing to a safer and more efficient mine.**
+
+## Shout outs 💥
+
+| <p align="center">![Rishi Viswanathan](https://github.com/risv1.png?size=128)<br>[Rishi Viswanathan](https://github.com/risv1)</p> | <p align="center">![Harsh Patel](https://github.com/HarshPatel5940.png?size=128)<br>[Harsh Patel](https://github.com/HarshPatel5940)</p>|
+ ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 
 ## License
 
