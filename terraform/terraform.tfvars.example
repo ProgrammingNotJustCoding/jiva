@@ -1,0 +1,26 @@
+aws_region =
+
+vpc_id =
+subnet_ids =
+ec_subnet_ids =
+rds_subnet_ids =
+subnet_id =
+
+allowed_cidr_blocks =
+
+ami =
+instance_type =
+key_name =
+
+s3_bucket_name =
+environment =
+enable_versioning =
+
+db_identifier =
+db_engine =
+db_engine_version =
+db_instance_class =
+db_allocated_storage =
+db_subnet_group_name =
+db_multi_az =
+
